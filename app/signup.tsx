@@ -12,44 +12,33 @@ import {
   Keyboard,
   Alert,
 } from "react-native";
+import bcrypt from "bcrypt-react-native";
+import postgres from "postgres";
 import { Link } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
 
-async function getValueFor(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
 export default function Index() {
   let [changeUsername, onChangeUsername] = useState("");
+  let [changeEmail, onChangeEmail] = useState("");
+
   let [changePassword, onChangePassword] = useState("");
   let [isDisabled, setDisabled] = useState(false);
-  function Login() {
-    setDisabled(true);
-    fetch("http://localhost:3000/api/login", {
+  function Signup() {
+    fetch("http://localhost:3000/api/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        email: changeEmail,
         username: changeUsername,
         password: changePassword,
       }),
     })
       .then((res) => res.json())
-      .then(async (data) => {
-        save('uuid', data.uuid);
+      .then((data) => {
         Alert.alert(data.message);
-        setDisabled(false);
-        console.log(getValueFor('uuid'));
       });
-    }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -69,11 +58,21 @@ export default function Index() {
                   paddingRight: 5,
                 }}
               >
-                shelfie
+                welcome to shelfie!
               </Text>
             </View>
           </View>
           <View>
+          <TextInput
+              style={styles.input}
+              onChangeText={(t) => {
+                onChangeEmail(t.trim().toLowerCase());
+              }}
+              value={changeEmail}
+              placeholder="email"
+              keyboardType="default"
+              autoCapitalize="none"
+            />
             <TextInput
               style={styles.input}
               onChangeText={(t) => {
@@ -95,19 +94,23 @@ export default function Index() {
             <View style={isDisabled ? styles.disabledButton : styles.button}>
               <Button
                 color="black"
-                title="log in"
-                onPress={Login}
+                title="sign up!"
+                onPress={Signup}
                 disabled={isDisabled}
               />
             </View>
             <Text style={{ textAlign: "center" }}>or</Text>
-            <View style={{
-              alignItems: "center",
-            }}>
-              <Link href="signup" style={{
-                fontSize: 18,
-              }}>
-             sign up
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Link href="/"
+                style={{
+                  fontSize: 18,
+                }}
+              >
+                log in
               </Link>
             </View>
           </View>
