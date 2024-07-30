@@ -28,19 +28,10 @@ async function get(key: string) {
   }
 }
 
-export default function Index() {
+export default function HomeScreen() {
   let [changeUsername, onChangeUsername] = useState("");
   let [changePassword, onChangePassword] = useState("");
   let [isDisabled, setDisabled] = useState(false);
-  useEffect(() => {
-    (async () => {
-      let uuid = await get('uuid');
-      if (uuid) {
-        router.replace('home')
-        console.log(uuid);
-      }
-    })();
-  }, []);
   function Login() {
     setDisabled(true);
     fetch("http://localhost:3000/api/login", {
@@ -70,7 +61,7 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View>
+        <ScrollView>
           <View
             style={{
               marginBottom: 20,
@@ -128,7 +119,121 @@ export default function Index() {
               </Link>
             </View>
           </View>
-        </View>
+          <View
+            style={{
+              marginBottom: 20,
+              alignItems: "center",
+            }}
+          >
+            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
+              <Text
+                style={{
+                  fontSize: 34,
+                  fontWeight: "bold",
+                  paddingLeft: 5,
+                  paddingRight: 5,
+                }}
+              >
+                shelfie
+              </Text>
+            </View>
+          </View>
+          <View>
+            <TextInput
+              style={styles.input}
+              onChangeText={(t) => {
+                onChangeUsername(t.trim().toLowerCase());
+              }}
+              value={changeUsername}
+              placeholder="username"
+              keyboardType="default"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangePassword}
+              value={changePassword}
+              placeholder="password"
+              secureTextEntry={true}
+              autoCapitalize="none"
+            />
+            <View style={isDisabled ? styles.disabledButton : styles.button}>
+              <Button
+                color="black"
+                title="log in"
+                onPress={Login}
+                disabled={isDisabled}
+              />
+            </View>
+            <Text style={{ textAlign: "center" }}>or</Text>
+            <View style={{
+              alignItems: "center",
+            }}>
+              <Link href="signup" style={{
+                fontSize: 18,
+              }}>
+             sign up
+              </Link>
+            </View>
+          </View>
+          <View
+            style={{
+              marginBottom: 20,
+              alignItems: "center",
+            }}
+          >
+            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
+              <Text
+                style={{
+                  fontSize: 34,
+                  fontWeight: "bold",
+                  paddingLeft: 5,
+                  paddingRight: 5,
+                }}
+              >
+                shelfie
+              </Text>
+            </View>
+          </View>
+          <View>
+            <TextInput
+              style={styles.input}
+              onChangeText={(t) => {
+                onChangeUsername(t.trim().toLowerCase());
+              }}
+              value={changeUsername}
+              placeholder="username"
+              keyboardType="default"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangePassword}
+              value={changePassword}
+              placeholder="password"
+              secureTextEntry={true}
+              autoCapitalize="none"
+            />
+            <View style={isDisabled ? styles.disabledButton : styles.button}>
+              <Button
+                color="black"
+                title="log in"
+                onPress={Login}
+                disabled={isDisabled}
+              />
+            </View>
+            <Text style={{ textAlign: "center" }}>or</Text>
+            <View style={{
+              alignItems: "center",
+            }}>
+              <Link href="signup" style={{
+                fontSize: 18,
+              }}>
+             sign up
+              </Link>
+            </View>
+          </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );
