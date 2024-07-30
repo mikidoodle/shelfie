@@ -11,31 +11,31 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./HomeScreen";
+
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
   return (
+    
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 100,
-          backgroundColor: "#ffffff40",
-          shadowColor: "#1f2687",
-          shadowOffset: {
-            width: 0,
-            height: 8,
-          },
+          bottom: 25,
+          left: 20,
+          width: '90%',
+          height: 60,
+          shadowColor: "#37B7C3",
           shadowOpacity: 0.37,
           shadowRadius: 32,
+          borderRadius: 64,
+          elevation: 5,
         }
       }}
     >
@@ -75,5 +75,5 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 9,
     backgroundColor: "#EFEFEF",
-  },
+  }
 });

@@ -11,9 +11,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { Link, router } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
+let gradient = require("../../assets/images/homeScreen.png");
+import * as SecureStore from "expo-secure-store";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -29,217 +31,33 @@ async function get(key: string) {
 }
 
 export default function HomeScreen() {
-  let [changeUsername, onChangeUsername] = useState("");
-  let [changePassword, onChangePassword] = useState("");
-  let [isDisabled, setDisabled] = useState(false);
-  function Login() {
-    setDisabled(true);
-    fetch("http://localhost:3000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: changeUsername,
-        password: changePassword,
-      }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        if (data.error) {
-          Alert.alert(data.message);
-          setDisabled(false);
-          return;
-        } else {
-        await save('uuid', data.uuid);
-        Alert.alert(data.message);
-        setDisabled(false);
-        console.log(await get('uuid'));
-        }
-      });
-    }
+  let [searchQuery, setSearchQuery] = useState<string>();
   return (
+    <ImageBackground source={gradient} style={styles.image} imageStyle={{opacity: 0.6}}>
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <ScrollView>
-          <View
-            style={{
-              marginBottom: 20,
-              alignItems: "center",
-            }}
-          >
-            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{
-                  fontSize: 34,
-                  fontWeight: "bold",
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                }}
-              >
-                shelfie
-              </Text>
-            </View>
-          </View>
-          <View>
-            <TextInput
-              style={styles.input}
-              onChangeText={(t) => {
-                onChangeUsername(t.trim().toLowerCase());
-              }}
-              value={changeUsername}
-              placeholder="username"
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              onChangeText={onChangePassword}
-              value={changePassword}
-              placeholder="password"
-              secureTextEntry={true}
-              autoCapitalize="none"
-            />
-            <View style={isDisabled ? styles.disabledButton : styles.button}>
-              <Button
-                color="black"
-                title="log in"
-                onPress={Login}
-                disabled={isDisabled}
-              />
-            </View>
-            <Text style={{ textAlign: "center" }}>or</Text>
-            <View style={{
-              alignItems: "center",
-            }}>
-              <Link href="signup" style={{
-                fontSize: 18,
-              }}>
-             sign up
-              </Link>
-            </View>
-          </View>
-          <View
-            style={{
-              marginBottom: 20,
-              alignItems: "center",
-            }}
-          >
-            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{
-                  fontSize: 34,
-                  fontWeight: "bold",
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                }}
-              >
-                shelfie
-              </Text>
-            </View>
-          </View>
-          <View>
-            <TextInput
-              style={styles.input}
-              onChangeText={(t) => {
-                onChangeUsername(t.trim().toLowerCase());
-              }}
-              value={changeUsername}
-              placeholder="username"
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              onChangeText={onChangePassword}
-              value={changePassword}
-              placeholder="password"
-              secureTextEntry={true}
-              autoCapitalize="none"
-            />
-            <View style={isDisabled ? styles.disabledButton : styles.button}>
-              <Button
-                color="black"
-                title="log in"
-                onPress={Login}
-                disabled={isDisabled}
-              />
-            </View>
-            <Text style={{ textAlign: "center" }}>or</Text>
-            <View style={{
-              alignItems: "center",
-            }}>
-              <Link href="signup" style={{
-                fontSize: 18,
-              }}>
-             sign up
-              </Link>
-            </View>
-          </View>
-          <View
-            style={{
-              marginBottom: 20,
-              alignItems: "center",
-            }}
-          >
-            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{
-                  fontSize: 34,
-                  fontWeight: "bold",
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                }}
-              >
-                shelfie
-              </Text>
-            </View>
-          </View>
-          <View>
-            <TextInput
-              style={styles.input}
-              onChangeText={(t) => {
-                onChangeUsername(t.trim().toLowerCase());
-              }}
-              value={changeUsername}
-              placeholder="username"
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              onChangeText={onChangePassword}
-              value={changePassword}
-              placeholder="password"
-              secureTextEntry={true}
-              autoCapitalize="none"
-            />
-            <View style={isDisabled ? styles.disabledButton : styles.button}>
-              <Button
-                color="black"
-                title="log in"
-                onPress={Login}
-                disabled={isDisabled}
-              />
-            </View>
-            <Text style={{ textAlign: "center" }}>or</Text>
-            <View style={{
-              alignItems: "center",
-            }}>
-              <Link href="signup" style={{
-                fontSize: 18,
-              }}>
-             sign up
-              </Link>
-            </View>
-          </View>
-        </ScrollView>
+        <View>
+          <Text style={styles.title}>shelfie!</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Type in a book name!"
+            onChangeText={(text) => setSearchQuery(text)}
+            value={searchQuery}
+          />
+        </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 34,
+    fontWeight: "bold",
+    paddingLeft: 5,
+    paddingRight: 5,
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -255,6 +73,23 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: "#F8F8F8",
   },
+  searchInput: {
+    height: 50,
+    borderWidth: 0,
+    padding: 10,
+    width: 300,
+    margin: 10,
+    borderRadius: 9,
+    backgroundColor: "#F8F8F8",
+    borderColor: "#37B7C3",
+    shadowColor: "#37B7C3",
+    shadowRadius: 20,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5
+  },
   button: {
     padding: 5,
     width: 300,
@@ -269,4 +104,10 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: "#EFEFEF",
   },
+  image: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center",
+
+  }
 });
