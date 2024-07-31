@@ -38,98 +38,24 @@ export default function Index() {
       if (uuid) {
         router.replace('home')
         console.log(uuid);
+      } else {
+        router.replace('login')
       }
     })();
   }, []);
-  function Login() {
-    setDisabled(true);
-    fetch("http://localhost:3000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: changeUsername,
-        password: changePassword,
-      }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        if (data.error) {
-          Alert.alert(data.message);
-          setDisabled(false);
-          return;
-        } else {
-        await save('uuid', data.uuid);
-        Alert.alert(data.message);
-        setDisabled(false);
-        console.log(await get('uuid'));
-        }
-      });
-    }
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View>
-          <View
-            style={{
-              marginBottom: 20,
-              alignItems: "center",
-            }}
-          >
-            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{
-                  fontSize: 34,
-                  fontWeight: "bold",
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                }}
-              >
-                shelfie
-              </Text>
-            </View>
-          </View>
-          <View>
-            <TextInput
-              style={styles.input}
-              onChangeText={(t) => {
-                onChangeUsername(t.trim().toLowerCase());
-              }}
-              value={changeUsername}
-              placeholder="username"
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              onChangeText={onChangePassword}
-              value={changePassword}
-              placeholder="password"
-              secureTextEntry={true}
-              autoCapitalize="none"
-            />
-            <View style={isDisabled ? styles.disabledButton : styles.button}>
-              <Button
-                color="black"
-                title="log in"
-                onPress={Login}
-                disabled={isDisabled}
-              />
-            </View>
-            <Text style={{ textAlign: "center" }}>or</Text>
-            <View style={{
-              alignItems: "center",
-            }}>
-              <Link href="signup" style={{
-                fontSize: 18,
-              }}>
-             sign up
-              </Link>
-            </View>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}>
+        <Text style={{
+          fontSize: 50,
+          fontWeight: "bold",
+          color: "#37B7C3",
+        }}>shelfie!</Text>
+      </View>
     </SafeAreaView>
   );
 }

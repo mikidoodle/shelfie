@@ -35,7 +35,6 @@ type Book = {
   title: string;
   authors: string;
   description: string;
-  thumbnail: string;
   etag: string;
   category: string[];
 };
@@ -43,39 +42,58 @@ export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   function searchBooks(query: string) {
-    setSearchQuery(query);
     if (query.length > 0) {
       setSearchResults([]);
       fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(
           query
-        )}`
+        )}&fields=title,first_sentence,isbn,author_name,subject&limit=50&lang=en`
       )
         .then((response) => response.json())
-        .then((data) => { 
-          console.log(data.items[0])
-          data.items.map((book: any) => {
-            if(book.kind === "books#volume") {
+        .then((data) => {
+          let mapSearchResults: Book[] = [];
+          data.docs.map((book: any) => {
               var bookInfo: Book = {
-                title: book.volumeInfo.title,
-                authors: book.volumeInfo.authors,
-                description: `${
-                  (book.volumeInfo.description?.toString()!.length > 300
-                    ? book.volumeInfo.description.substring(0, 300)
-                    : book.volumeInfo.description) || ""
-                }...`,
-                thumbnail: book.volumeInfo.imageLinks?.thumbnail || "",
-                etag: book.etag,
-                category: book.volumeInfo.categories || [],
+                title: book.title,
+                authors: Object.keys(book).includes("author_name") ? book.author_name[0] : "",
+                description: Object.keys(book).includes("first_sentence") ? book.first_sentence[0] : "No description available",
+                etag: Object.keys(book).includes("isbn") ? book.isbn[Math.random() * book.isbn.length | 0] : "",
+                category: book.subject || [],
               };
-              setSearchResults([...searchResults, bookInfo]);
-            }
+              mapSearchResults.push(bookInfo);
           });
-
+          setSearchResults(mapSearchResults);
         });
     } else {
       setSearchResults([]);
     }
+  }
+  function addISBN(book: Book) {
+    fetch("http://localhost:3000/api/addISBN", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        isbn: {
+        title: book.title,
+        authors: book.authors,
+        description: book.description,
+        etag: book.etag,
+        category: book.category,
+        },
+        uuid: get("uuid"),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          Alert.alert(data.message);
+          return;
+        } else {
+          Alert.alert(data.message);
+        }
+      });
   }
   return (
     <ImageBackground
@@ -91,8 +109,12 @@ export default function HomeScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Type in a book name!"
-              onChangeText={(text) => searchBooks(text)}
+              onChangeText={(text) => setSearchQuery(text)}
               value={searchQuery}
+            />
+            <Button
+              title="Search"
+              onPress={()=>{setSearchResults([]);searchBooks(searchQuery)}}
             />
             <View style={{
               alignItems: "center",
@@ -110,10 +132,10 @@ export default function HomeScreen() {
                       }}
                       key={book.etag}
                     >
-                      {book.thumbnail !== "" ? (
+                      {book.etag !== "" ? (
                         <Image
                           source={{
-                            uri: book.thumbnail.replace('http', 'https'),
+                            uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-Mth.jpg`,
                           }}
                           style={{
                             width: 325,
@@ -142,7 +164,7 @@ export default function HomeScreen() {
                         }}>{book.authors}</Text>
                         <Text>{book.description}</Text>
                       </View>
-                      
+                        <Button title="Add to shelf" onPress={() => addISBN(book)} />
                     </View>
                   ))
                 : null}
@@ -198,8 +220,6 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 5,
-    width: 300,
-    margin: 10,
     borderRadius: 9,
     backgroundColor: "#37B7C3",
   },
