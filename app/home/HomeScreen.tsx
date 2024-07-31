@@ -12,8 +12,8 @@ import {
   Keyboard,
   Alert,
   ImageBackground,
+  Image,
 } from "react-native";
-import { Image } from 'expo-image';
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
@@ -37,6 +37,7 @@ type Book = {
   description: string;
   thumbnail: string;
   etag: string;
+  category: string[];
 };
 export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
@@ -51,26 +52,26 @@ export default function HomeScreen() {
         )}`
       )
         .then((response) => response.json())
-        .then((data) => {
-          let index = 0;
+        .then((data) => { 
+          console.log(data.items[0])
           data.items.map((book: any) => {
-            if (index <= 10) {
-              console.log(book);
+            if(book.kind === "books#volume") {
               var bookInfo: Book = {
                 title: book.volumeInfo.title,
                 authors: book.volumeInfo.authors,
                 description: `${
-                  (book.volumeInfo.description?.toString()!.length > 250
-                    ? book.volumeInfo.description.substring(0, 250)
+                  (book.volumeInfo.description?.toString()!.length > 300
+                    ? book.volumeInfo.description.substring(0, 300)
                     : book.volumeInfo.description) || ""
                 }...`,
                 thumbnail: book.volumeInfo.imageLinks?.thumbnail || "",
                 etag: book.etag,
+                category: book.volumeInfo.categories || [],
               };
               setSearchResults([...searchResults, bookInfo]);
-              index++;
             }
           });
+
         });
     } else {
       setSearchResults([]);
@@ -82,6 +83,7 @@ export default function HomeScreen() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
+      <ScrollView>
       <SafeAreaView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
@@ -92,12 +94,11 @@ export default function HomeScreen() {
               onChangeText={(text) => searchBooks(text)}
               value={searchQuery}
             />
-            <ScrollView
-              style={{
-                width: "90%",
-                margin: "auto",
-              }}
-            >
+            <View style={{
+              alignItems: "center",
+              justifyContent: "center",
+              width: "90%"
+            }}>
               {searchResults.length > 0 && searchQuery !== ""
                 ? searchResults.map((book: Book) => (
                     <View
@@ -105,22 +106,21 @@ export default function HomeScreen() {
                         backgroundColor: "white",
                         margin: 10,
                         borderRadius: 9,
-                        width: 300,
+                        width: 325,
                       }}
                       key={book.etag}
                     >
                       {book.thumbnail !== "" ? (
                         <Image
                           source={{
-                            uri: book.thumbnail,
+                            uri: book.thumbnail.replace('http', 'https'),
                           }}
-                          contentFit="cover"
-                          placeholder="|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj["
                           style={{
-                            width: 300,
+                            width: 325,
+                            height: 150,
                             borderTopLeftRadius: 9,
                             borderTopRightRadius: 9,
-
+                            resizeMode: "cover",
                           }}
                         />
                       ) : (
@@ -130,17 +130,28 @@ export default function HomeScreen() {
                         padding: 10,
                         shadowColor: "#37B7C3",
                       }}>
-                        <Text>{book.title}</Text>
-                        <Text>{book.authors}</Text>
+                        <Text style={{
+                          fontSize: 20,
+                          fontWeight: "bold",
+                        }}>{book.title}</Text>
+                        <Text style={{
+                          fontFamily: "Menlo",
+                          textTransform: "uppercase",
+                          paddingBottom: 5,
+                          paddingTop: 5
+                        }}>{book.authors}</Text>
                         <Text>{book.description}</Text>
                       </View>
+                      
                     </View>
                   ))
                 : null}
-            </ScrollView>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </SafeAreaView>
+
+    </ScrollView>
     </ImageBackground>
   );
 }
@@ -172,7 +183,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 0,
     padding: 10,
-    width: 300,
+    width: 325,
     margin: 10,
     borderRadius: 9,
     backgroundColor: "#F8F8F8",
