@@ -16,6 +16,7 @@ import {
 import { Icon } from "@rneui/themed";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./HomeScreen";
+import Library from "./Library";
 
 const Tab = createBottomTabNavigator();
 
@@ -52,14 +53,19 @@ export default function Home() {
           ),
         }}
       />
-      <Tab.Screen name="Also home" component={HomeScreen} options={{
+      <Tab.Screen name="Library" component={Library} options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" type="octicon" color={color} />
+            <Icon name="repo" type="octicon" color={color} />
           ),
         }} />
-      <Tab.Screen name="Also also home" component={HomeScreen} options={{
+        <Tab.Screen name="Swipe" component={Library} options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" type="octicon" color={color} />
+            <Icon name="heart" type="octicon" color={color} />
+          ),
+        }} />
+      <Tab.Screen name="Settings" component={HomeScreen} options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="gear" type="octicon" color={color} />
           ),
         }}/>
     </Tab.Navigator>

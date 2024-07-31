@@ -40,65 +40,54 @@ type Book = {
   etag: string;
   category: string[];
 };
-export default function HomeScreen() {
+export default function Library() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [searchResults, setSearchResults] = useState<Book[]>([]);
-  function searchBooks(query: string) {
-    if (query.length > 0) {
+  useEffect(() => {
+    searchBooks();
+  }, []);
+  async function searchBooks() {
+    let uuid = await get('uuid');
       setSearchResults([]);
       fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(
-          query
-        )}&fields=title,first_sentence,isbn,author_name,subject&limit=100&lang=en`
+        `http://localhost:3000/api/library`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid: uuid
+          }),
+        }
       )
         .then((response) => response.json())
         .then((data) => {
+          if(data.books.length === 0) {
+            setSearchResults([{
+              title: "No books in library",
+              authors: "",
+              description: "Add books to your library by scanning the barcode on the back of the book",
+              etag: "404shelfieerror",
+              category: [""],
+            }])
+            return;
+          }
           let mapSearchResults: Book[] = [];
-          data.docs.map((book: any) => {
+          data.books.map((book: any) => {
               var bookInfo: Book = {
                 title: book.title,
-                authors: Object.keys(book).includes("author_name") ? book.author_name[0] : "",
-                description: Object.keys(book).includes("first_sentence") ? book.first_sentence[0] : "No description available",
-                etag: Object.keys(book).includes("isbn") ? book.isbn[0] : "",
+                authors: Object.keys(book).includes("authors") ? book.authors : "",
+                description: Object.keys(book).includes("description") ? book.description : "No description available",
+                etag: Object.keys(book).includes("etag") ? book.etag : "",
                 category: book.subject || [],
               };
               mapSearchResults.push(bookInfo);
           });
           setSearchResults(mapSearchResults);
         });
-    } else {
-      setSearchResults([]);
-    }
   }
-  async function addISBN(book: Book) {
-    let uuidC = await get("uuid");
-    console.log(uuidC)
-    fetch("http://localhost:3000/api/addISBN", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        isbn: encodeURIComponent(JSON.stringify({
-        title: book.title,
-        authors: book.authors,
-        description: book.description,
-        etag: book.etag,
-        category: book.category,
-        })),
-        uuid: uuidC,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          Alert.alert(data.message);
-          return;
-        } else {
-          Alert.alert(data.message);
-        }
-      });
-  }
+
   return (
     <ImageBackground
       source={gradient}
@@ -109,29 +98,23 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
-            <Text style={styles.title}>shelfie!</Text>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Type in a book name!"
-              onChangeText={(text) => setSearchQuery(text)}
-              value={searchQuery}
-            />
-            <Pressable style={{
-                          flexDirection: "row",
-                          justifyContent: "center",
-                          gap: 5
-                        }} onPress={()=>{setSearchResults([]);searchBooks(searchQuery)}}>
-            <Text style={{fontSize: 20}}>search</Text>
-            <Icon name="search" type="octicon" size={20} style={{verticalAlign: 'middle', marginTop: 2}} color={"black"} />
+          <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}>
+            <Text style={styles.title}>library</Text>
+            <Pressable onPress={searchBooks}>
+            <Icon name="sync" type="octicon" size={26} style={styles.titleIcon} color={"black"} />
             </Pressable>
+            </View>
             <View style={{
               alignItems: "center",
               justifyContent: "center",
               width: "90%"
             }}>
-              {searchResults.length > 0 && searchQuery !== ""
+              {searchResults.length > 0 
                 ? searchResults.map((book: Book, index: number) => (
-                    <View
+                    book.etag !== "404shelfieerror" ? (<View
                       style={{
                         backgroundColor: "white",
                         margin: 10,
@@ -172,21 +155,27 @@ export default function HomeScreen() {
                         }}>{book.authors}</Text>
                         <Text>{book.description}</Text>
                       </View>
-                        <Pressable style={{
-                          flexDirection: "row",
-                          justifyContent: "center",
-                          gap: 5,
-                          marginBottom: 10
-                        }} onPress={() => addISBN(book)}>
-                          <Icon name="heart" type="octicon" size={20} style={{verticalAlign: 'middle', marginTop: 2}} color={"#37B7C3"} />
-                        <Text style={{
-                          fontSize: 20,
-                          color: "#37B7C3"
-                        }}>add to shelf!</Text>
-                          </Pressable>
-                    </View>
+                    </View>) : <View style={{
+                        margin: 10,
+                        marginTop: 50,
+                        borderRadius: 9,
+                        width: 325,
+                        alignItems: "center",
+                      }}><Text style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+
+                      }}>No books in your library.</Text><Text> Add one from the home screen!</Text></View> 
                   ))
-                : null}
+                : <View style={{
+                  margin: 10,
+                  marginTop: 50,
+                  borderRadius: 9,
+                  width: 325,
+                  alignItems: "center"
+                }}><Text style={{fontSize: 20,
+                  fontWeight: "bold"}}>Loading library...</Text></View>
+                }
             </View>
           </View>
         </TouchableWithoutFeedback>
@@ -204,6 +193,12 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 5,
     marginTop: 50,
+  },
+  titleIcon: {
+    fontSize: 34,
+    fontWeight: "bold",
+    paddingRight: 15,
+    marginTop: 55,
   },
   container: {
     flex: 1,

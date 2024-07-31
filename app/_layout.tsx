@@ -10,9 +10,10 @@ export default function RootLayout() {
         contentStyle: {
           backgroundColor: "#fff",
         },
+        animation: "fade",
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="index"/>
       <Stack.Screen name="login" />
       <Stack.Screen name="signup" />
       <Stack.Screen name="home/index" />
