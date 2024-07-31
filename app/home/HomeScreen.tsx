@@ -47,7 +47,7 @@ export default function HomeScreen() {
       fetch(
         `https://openlibrary.org/search.json?q=${encodeURIComponent(
           query
-        )}&fields=title,first_sentence,isbn,author_name,subject&limit=50&lang=en`
+        )}&fields=title,first_sentence,isbn,author_name,subject&limit=100&lang=en`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -57,7 +57,7 @@ export default function HomeScreen() {
                 title: book.title,
                 authors: Object.keys(book).includes("author_name") ? book.author_name[0] : "",
                 description: Object.keys(book).includes("first_sentence") ? book.first_sentence[0] : "No description available",
-                etag: Object.keys(book).includes("isbn") ? book.isbn[Math.random() * book.isbn.length | 0] : "",
+                etag: Object.keys(book).includes("isbn") ? book.isbn[0] : "",
                 category: book.subject || [],
               };
               mapSearchResults.push(bookInfo);
@@ -68,21 +68,23 @@ export default function HomeScreen() {
       setSearchResults([]);
     }
   }
-  function addISBN(book: Book) {
+  async function addISBN(book: Book) {
+    let uuidC = await get("uuid");
+    console.log(uuidC)
     fetch("http://localhost:3000/api/addISBN", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        isbn: {
+        isbn: encodeURIComponent(JSON.stringify({
         title: book.title,
         authors: book.authors,
         description: book.description,
         etag: book.etag,
         category: book.category,
-        },
-        uuid: get("uuid"),
+        })),
+        uuid: uuidC,
       }),
     })
       .then((res) => res.json())
@@ -122,7 +124,7 @@ export default function HomeScreen() {
               width: "90%"
             }}>
               {searchResults.length > 0 && searchQuery !== ""
-                ? searchResults.map((book: Book) => (
+                ? searchResults.map((book: Book, index: number) => (
                     <View
                       style={{
                         backgroundColor: "white",
@@ -130,12 +132,12 @@ export default function HomeScreen() {
                         borderRadius: 9,
                         width: 325,
                       }}
-                      key={book.etag}
+                      key={index}
                     >
                       {book.etag !== "" ? (
                         <Image
                           source={{
-                            uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-Mth.jpg`,
+                            uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
                           }}
                           style={{
                             width: 325,
