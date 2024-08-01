@@ -61,9 +61,9 @@ export default function Index() {
           return;
         } else {
         await save('uuid', data.uuid);
-        Alert.alert(data.message);
         setDisabled(false);
         console.log(await get('uuid'));
+        router.replace('/');
         }
       });
     }
@@ -97,7 +97,7 @@ export default function Index() {
                 onChangeUsername(t.trim().toLowerCase());
               }}
               value={changeUsername}
-              placeholder="username"
+              placeholder="username or email"
               keyboardType="default"
               autoCapitalize="none"
             />

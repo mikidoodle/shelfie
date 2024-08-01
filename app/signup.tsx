@@ -14,15 +14,29 @@ import {
 } from "react-native";
 import bcrypt from "bcrypt-react-native";
 import postgres from "postgres";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 export default function Index() {
+  async function save(key: string, value: string) {
+    await SecureStore.setItemAsync(key, value);
+  }
+  
+  async function get(key: string) {
+    let result = await SecureStore.getItemAsync(key);
+    if (result) {
+      return result;
+    } else {
+      return null;
+    }
+  }
   let [changeUsername, onChangeUsername] = useState("");
   let [changeEmail, onChangeEmail] = useState("");
 
   let [changePassword, onChangePassword] = useState("");
   let [isDisabled, setDisabled] = useState(false);
   function Signup() {
+    setDisabled(true);
     fetch("http://localhost:3000/api/signup", {
       method: "POST",
       headers: {
@@ -35,8 +49,13 @@ export default function Index() {
       }),
     })
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
+        setDisabled(false);
         Alert.alert(data.message);
+        if(data.error === false) {
+        await save("uuid", data.user);
+        router.replace("/");
+        }
       });
   }
   return (

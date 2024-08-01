@@ -17,7 +17,8 @@ import { Icon } from "@rneui/themed";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./HomeScreen";
 import Library from "./Library";
-
+import Settings from "./Settings";
+import styles from "../../assets/styles/style";
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
@@ -53,9 +54,9 @@ export default function Home() {
           ),
         }}
       />
-      <Tab.Screen name="Library" component={Library} options={{
+      <Tab.Screen name="Bulletin" component={Library} options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="repo" type="octicon" color={color} />
+            <Icon name="telescope" type="octicon" color={color} />
           ),
         }} />
         <Tab.Screen name="Swipe" component={Library} options={{
@@ -63,7 +64,14 @@ export default function Home() {
             <Icon name="heart" type="octicon" color={color} />
           ),
         }} />
-      <Tab.Screen name="Settings" component={HomeScreen} options={{
+      <Tab.Screen name="Library" component={Library} options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="repo" type="octicon" color={color} />
+          ),
+        }} />
+        
+        
+      <Tab.Screen name="Settings" component={Settings} options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="gear" type="octicon" color={color} />
           ),
@@ -71,42 +79,3 @@ export default function Home() {
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBarIcon: {
-    width: 30,
-    height: 30,
-    verticalAlign: "middle",
-    position: "absolute",
-    top: 15,
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 100,
-  },
-  input: {
-    height: 50,
-    borderWidth: 0,
-    padding: 10,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#F8F8F8",
-  },
-  button: {
-    padding: 5,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#37B7C3",
-  },
-  disabledButton: {
-    padding: 5,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#EFEFEF",
-  },
-});
