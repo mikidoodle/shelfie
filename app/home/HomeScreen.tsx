@@ -47,6 +47,8 @@ type Book = {
 
 export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
+  let [username, setUsername] = useState<any>("");
+  let [uuid, setUUID] = useState<any>("");
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
   let [modalContent, setModalContent] = useState<ReactElement>();
@@ -58,7 +60,7 @@ export default function HomeScreen() {
       fetch(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           query
-        )}&fields=title,first_sentence,isbn,author_name,subject&limit=100&lang=en`
+        )}&fields=title,first_sentence,isbn,author_name,subject&limit=50&lang=en`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -85,15 +87,52 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
-    startReview();
+    (async () => {
+      let uuidC = await get("uuid");
+      let usernameC = await get("username");
+        setUsername(usernameC);
+        setUUID(uuidC);
+    })();
   }, []);
 
-  async function startReview() {
+  function submitReview(book: Book) {
+
+    fetch("http://localhost:3000/api/addReview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: reviewTitle,
+        content: reviewContent,
+        book: book,
+        uuid: uuid,
+        username: username,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          Alert.alert(data.message);
+          return;
+        } else {
+          Alert.alert(data.message);
+          //TODO: navigate to review thru data.postuuid
+          setReviewContent("");
+          setReviewTitle("");
+          setModalVisible(false);
+
+        }
+      });
+  }
+  async function startReview(book: Book) {
     setModalContent(
       <View>
+        {
+          book.etag !== "" ? 
         <Image
           source={{
-            uri: "https://ia600505.us.archive.org/view_archive.php?archive=/5/items/m_covers_0012/m_covers_0012_50.zip&file=0012504196-M.jpg",
+            uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
           }}
           style={{
             width: "100%",
@@ -102,21 +141,37 @@ export default function HomeScreen() {
             borderTopRightRadius: 9,
             resizeMode: "cover",
           }}
-        />
-        <ScrollView>
+        /> : null}
         <View
           style={{
-            padding: 20,
+            padding: 10,
           }}
         >
+          <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+          >
           <Text
             style={{
               fontSize: 32,
               fontWeight: "bold",
             }}
           >
-            Title
+            {book.title}
           </Text>
+          <Pressable style={{
+          backgroundColor: "black",
+          padding: 10,
+          borderRadius: 9,
+        }}>
+          <Text style={{color: 'white', fontSize: 20}}>
+            Post Review!
+          </Text>
+        </Pressable>
+        </View>
           <Text
             style={{
               paddingBottom: 5,
@@ -124,12 +179,12 @@ export default function HomeScreen() {
               color: "grey",
             }}
           >
-            username's review
+            {username}'s review
           </Text>
+          <ScrollView style={{height: '100%'}}>
           <TextInput
             style={styles.reviewTitleInput}
             placeholder="Title"
-            value={reviewTitle}
             onChangeText={(text) => setReviewTitle(text)}
             keyboardType="default"
             autoCapitalize="none"
@@ -137,15 +192,14 @@ export default function HomeScreen() {
           <TextInput
             style={styles.reviewContentInput}
             placeholder="Write your review here!"
-            value={reviewContent}
             onChangeText={(text) => setReviewContent(text)}
             keyboardType="default"
             autoCapitalize="none"
             multiline={true}
             numberOfLines={4}
           />
-        </View>
         </ScrollView>
+        </View>
       </View>
     );
     setModalVisible(true);
@@ -217,7 +271,7 @@ export default function HomeScreen() {
             <View
               style={{
                 top: 0,
-                height: "85%",
+                height: "90%",
                 width: "100%",
                 padding: 0,
                 borderTopRightRadius: 25,
@@ -323,12 +377,53 @@ export default function HomeScreen() {
                             </Text>
                             <Text>{book.description}</Text>
                           </View>
+                          <View style={{
+                            flexDirection: "row",
+                            justifyContent: 'space-evenly',
+                            gap: 5,
+                            borderBottomLeftRadius: 9,
+                            borderBottomRightRadius: 9,
+                            borderWidth: 2,
+                            borderColor: '#37B7C3',
+                          }}>
+                            <Pressable
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "center",
+                              gap: 5,
+                              margin: 10
+                            }}
+                            onPress={() => startReview(book)}
+                          >
+                            <Icon
+                              name="pencil"
+                              type="octicon"
+                              size={20}
+                              style={{ verticalAlign: "middle", marginTop: 2 }}
+                              color={"#37B7C3"}
+                            />
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#37B7C3",
+                              }}
+                            >
+                              review
+                            </Text>
+                          </Pressable>
+                          <View
+                            style={{
+                              height: "100%",
+                              width: 2,
+                              backgroundColor: '#37B7C3',
+                            }}
+                          />
                           <Pressable
                             style={{
                               flexDirection: "row",
                               justifyContent: "center",
                               gap: 5,
-                              marginBottom: 10,
+                              margin: 10
                             }}
                             onPress={() => addISBN(book)}
                           >
@@ -345,9 +440,10 @@ export default function HomeScreen() {
                                 color: "#37B7C3",
                               }}
                             >
-                              add to shelf!
+                              add to shelf
                             </Text>
                           </Pressable>
+                          </View>
                         </View>
                       ))
                     : null}

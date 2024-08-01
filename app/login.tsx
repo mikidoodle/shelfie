@@ -61,8 +61,8 @@ export default function Index() {
           return;
         } else {
         await save('uuid', data.uuid);
+        await save('username', data.username);
         setDisabled(false);
-        console.log(await get('uuid'));
         router.replace('/');
         }
       });

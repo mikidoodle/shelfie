@@ -53,7 +53,8 @@ export default function Index() {
         setDisabled(false);
         Alert.alert(data.message);
         if(data.error === false) {
-        await save("uuid", data.user);
+        await save("uuid", data.uuid);
+        await save('username', data.username);
         router.replace("/");
         }
       });

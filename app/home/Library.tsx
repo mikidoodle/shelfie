@@ -122,7 +122,7 @@ export default function Library() {
                         borderRadius: 9,
                         width: 325,
                       }}
-                      key={index}
+                      key={0}
                     >
                       {book.etag !== "" ? (
                         <Image
