@@ -21,6 +21,8 @@ let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
+import GestureRecognizer from "react-native-swipe-gestures";
+
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -48,11 +50,13 @@ export default function HomeScreen() {
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
   let [modalContent, setModalContent] = useState<ReactElement>();
+  let [reviewTitle, setReviewTitle] = useState<string>("");
+  let [reviewContent, setReviewContent] = useState<string>("");
   function searchBooks(query: string) {
     if (query.length > 0) {
       setSearchResults([]);
       fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(
+        `https://openlibrary.org/search.json?title=${encodeURIComponent(
           query
         )}&fields=title,first_sentence,isbn,author_name,subject&limit=100&lang=en`
       )
@@ -79,15 +83,69 @@ export default function HomeScreen() {
       setSearchResults([]);
     }
   }
-/*
+
   useEffect(() => {
     startReview();
-  }, []);*/
+  }, []);
+
   async function startReview() {
     setModalContent(
       <View>
-        
-        <Text>hi</Text>
+        <Image
+          source={{
+            uri: "https://ia600505.us.archive.org/view_archive.php?archive=/5/items/m_covers_0012/m_covers_0012_50.zip&file=0012504196-M.jpg",
+          }}
+          style={{
+            width: "100%",
+            height: 175,
+            borderTopLeftRadius: 9,
+            borderTopRightRadius: 9,
+            resizeMode: "cover",
+          }}
+        />
+        <ScrollView>
+        <View
+          style={{
+            padding: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 32,
+              fontWeight: "bold",
+            }}
+          >
+            Title
+          </Text>
+          <Text
+            style={{
+              paddingBottom: 5,
+              paddingTop: 5,
+              color: "grey",
+            }}
+          >
+            username's review
+          </Text>
+          <TextInput
+            style={styles.reviewTitleInput}
+            placeholder="Title"
+            value={reviewTitle}
+            onChangeText={(text) => setReviewTitle(text)}
+            keyboardType="default"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.reviewContentInput}
+            placeholder="Write your review here!"
+            value={reviewContent}
+            onChangeText={(text) => setReviewContent(text)}
+            keyboardType="default"
+            autoCapitalize="none"
+            multiline={true}
+            numberOfLines={4}
+          />
+        </View>
+        </ScrollView>
       </View>
     );
     setModalVisible(true);
@@ -129,167 +187,176 @@ export default function HomeScreen() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
+      <GestureRecognizer
+        onSwipeDown={() => {
+          if (modalVisible) {
+            setModalVisible(false);
+          }
+        }}
+        style={{
+          flex: 1,
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-            borderTopRightRadius: 25,
-            borderTopLeftRadius: 25,
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
           }}
         >
           <View
             style={{
-              top: 0,
-              height: "70%",
-              width: "100%",
-              padding: 15,
+              flex: 1,
+              justifyContent: "flex-end",
+              alignItems: "flex-end",
               borderTopRightRadius: 25,
               borderTopLeftRadius: 25,
-              borderWidth: 2,
-              borderColor: "#f3f3f3",
-              backgroundColor: "#f9f9f9",
             }}
           >
-            {modalContent}
+            <View
+              style={{
+                top: 0,
+                height: "85%",
+                width: "100%",
+                padding: 0,
+                borderTopRightRadius: 25,
+                borderTopLeftRadius: 25,
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              {modalContent}
+            </View>
           </View>
-        </View>
-      </Modal>
-      <ScrollView>
-        <SafeAreaView style={styles.container}>
-          <TouchableWithoutFeedback
-            onPress={Keyboard.dismiss}
-            accessible={false}
-          >
-            <View>
-              <Text style={styles.title}>shelfie!</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Type in a book name!"
-                onChangeText={(text) => setSearchQuery(text)}
-                value={searchQuery}
-              />
-              <Pressable
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  gap: 5,
-                }}
-                onPress={() => {
-                  setSearchResults([]);
-                  searchBooks(searchQuery);
-                }}
-              >
-                <Text style={{ fontSize: 20 }}>search</Text>
-                <Icon
-                  name="search"
-                  type="octicon"
-                  size={20}
-                  style={{ verticalAlign: "middle", marginTop: 2 }}
-                  color={"black"}
+        </Modal>
+        <ScrollView>
+          <SafeAreaView style={styles.container}>
+            <TouchableWithoutFeedback
+              onPress={Keyboard.dismiss}
+              accessible={false}
+            >
+              <View>
+                <Text style={styles.title}>shelfie!</Text>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Type in a book name!"
+                  onChangeText={(text) => setSearchQuery(text)}
+                  value={searchQuery}
                 />
-              </Pressable>
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "90%",
-                }}
-              >
-                {searchResults.length > 0 && searchQuery !== ""
-                  ? searchResults.map((book: Book, index: number) => (
-                      <View
-                        style={{
-                          backgroundColor: "white",
-                          margin: 10,
-                          borderRadius: 9,
-                          width: 325,
-                        }}
-                        key={index}
-                      >
-                        {book.etag !== "" ? (
-                          <Image
-                            source={{
-                              uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
-                            }}
-                            style={{
-                              width: 325,
-                              height: 150,
-                              borderTopLeftRadius: 9,
-                              borderTopRightRadius: 9,
-                              resizeMode: "cover",
-                            }}
-                          />
-                        ) : (
-                          <Text>No image available</Text>
-                        )}
+                <Pressable
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    gap: 5,
+                  }}
+                  onPress={() => {
+                    setSearchResults([]);
+                    searchBooks(searchQuery);
+                  }}
+                >
+                  <Text style={{ fontSize: 20 }}>search</Text>
+                  <Icon
+                    name="search"
+                    type="octicon"
+                    size={20}
+                    style={{ verticalAlign: "middle", marginTop: 2 }}
+                    color={"black"}
+                  />
+                </Pressable>
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "90%",
+                  }}
+                >
+                  {searchResults.length > 0 && searchQuery !== ""
+                    ? searchResults.map((book: Book, index: number) => (
                         <View
                           style={{
-                            padding: 10,
-                            shadowColor: "#37B7C3",
+                            backgroundColor: "white",
+                            margin: 10,
+                            borderRadius: 9,
+                            width: 325,
                           }}
+                          key={index}
                         >
-                          <Text
+                          {book.etag !== "" ? (
+                            <Image
+                              source={{
+                                uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
+                              }}
+                              style={{
+                                width: 325,
+                                height: 150,
+                                borderTopLeftRadius: 9,
+                                borderTopRightRadius: 9,
+                                resizeMode: "cover",
+                              }}
+                            />
+                          ) : (
+                            <Text>No image available</Text>
+                          )}
+                          <View
                             style={{
-                              fontSize: 20,
-                              fontWeight: "bold",
+                              padding: 10,
+                              shadowColor: "#37B7C3",
                             }}
                           >
-                            {book.title}
-                          </Text>
-                          <Text
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {book.title}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: "Menlo",
+                                textTransform: "uppercase",
+                                paddingBottom: 5,
+                                paddingTop: 5,
+                              }}
+                            >
+                              {book.authors}
+                            </Text>
+                            <Text>{book.description}</Text>
+                          </View>
+                          <Pressable
                             style={{
-                              fontFamily: "Menlo",
-                              textTransform: "uppercase",
-                              paddingBottom: 5,
-                              paddingTop: 5,
+                              flexDirection: "row",
+                              justifyContent: "center",
+                              gap: 5,
+                              marginBottom: 10,
                             }}
+                            onPress={() => addISBN(book)}
                           >
-                            {book.authors}
-                          </Text>
-                          <Text>{book.description}</Text>
+                            <Icon
+                              name="heart"
+                              type="octicon"
+                              size={20}
+                              style={{ verticalAlign: "middle", marginTop: 2 }}
+                              color={"#37B7C3"}
+                            />
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#37B7C3",
+                              }}
+                            >
+                              add to shelf!
+                            </Text>
+                          </Pressable>
                         </View>
-                        <Pressable
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            gap: 5,
-                            marginBottom: 10,
-                          }}
-                          onPress={() => addISBN(book)}
-                        >
-                          <Icon
-                            name="heart"
-                            type="octicon"
-                            size={20}
-                            style={{ verticalAlign: "middle", marginTop: 2 }}
-                            color={"#37B7C3"}
-                          />
-                          <Text
-                            style={{
-                              fontSize: 20,
-                              color: "#37B7C3",
-                            }}
-                          >
-                            add to shelf!
-                          </Text>
-                        </Pressable>
-                      </View>
-                    ))
-                  : null}
+                      ))
+                    : null}
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </SafeAreaView>
-      </ScrollView>
+            </TouchableWithoutFeedback>
+          </SafeAreaView>
+        </ScrollView>
+      </GestureRecognizer>
     </ImageBackground>
   );
 }

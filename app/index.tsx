@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Link, router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-
+import styles from "../assets/styles/style";
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -59,35 +59,3 @@ export default function Index() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 100,
-  },
-  input: {
-    height: 50,
-    borderWidth: 0,
-    padding: 10,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#F8F8F8",
-  },
-  button: {
-    padding: 5,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#37B7C3",
-  },
-  disabledButton: {
-    padding: 5,
-    width: 300,
-    margin: 10,
-    borderRadius: 9,
-    backgroundColor: "#EFEFEF",
-  },
-});
