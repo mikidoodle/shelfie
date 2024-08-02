@@ -19,6 +19,7 @@ import HomeScreen from "./HomeScreen";
 import Library from "./Library";
 import Settings from "./Settings";
 import styles from "../../assets/styles/style";
+import Bulletin from "./Bulletin";
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
@@ -54,7 +55,7 @@ export default function Home() {
           ),
         }}
       />
-      <Tab.Screen name="Bulletin" component={Library} options={{
+      <Tab.Screen name="Bulletin" component={Bulletin} options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="telescope" type="octicon" color={color} />
           ),
