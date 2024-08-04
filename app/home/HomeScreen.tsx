@@ -62,7 +62,7 @@ export default function HomeScreen() {
       fetch(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           query
-        )}&fields=title,first_sentence,isbn,author_name,subject&limit=50&lang=en`
+        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=50&lang=en`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -76,7 +76,7 @@ export default function HomeScreen() {
               description: Object.keys(book).includes("first_sentence")
                 ? book.first_sentence[0]
                 : "No description available",
-              etag: Object.keys(book).includes("isbn") ? book.isbn[0] : "",
+              etag: Object.keys(book).includes("cover_edition_key") ? book.cover_edition_key : "",
               category: book.subject || [],
             };
             mapSearchResults.push(bookInfo);
@@ -133,7 +133,7 @@ export default function HomeScreen() {
         {book.etag !== "" ? (
           <Image
             source={{
-              uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
+              uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
             }}
             style={{
               width: "100%",
@@ -354,7 +354,7 @@ export default function HomeScreen() {
                           {book.etag !== "" ? (
                             <Image
                               source={{
-                                uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
+                                uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
                               }}
                               style={{
                                 width: 325,

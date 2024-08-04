@@ -122,12 +122,12 @@ export default function Library() {
                         borderRadius: 9,
                         width: 325,
                       }}
-                      key={0}
+                      key={index}
                     >
                       {book.etag !== "" ? (
                         <Image
                           source={{
-                            uri: `https://covers.openlibrary.org/b/isbn/${book.etag}-M.jpg`,
+                            uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
                           }}
                           style={{
                             width: 325,
@@ -162,7 +162,7 @@ export default function Library() {
                         borderRadius: 9,
                         width: 325,
                         alignItems: "center",
-                      }}><Text style={{
+                      }} key={0}><Text style={{
                         fontSize: 20,
                         fontWeight: "bold",
 

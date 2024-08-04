@@ -23,6 +23,7 @@ import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../../assets/styles/style";
 import SwipeScreen from "./SwipeScreen";
+import Start from "./Start";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -36,15 +37,18 @@ async function get(key: string) {
     return null;
   }
 }
+
 const Stack = createNativeStackNavigator();
 
 export default function Swipes() {
   return (
+    
     <ImageBackground
       source={gradient}
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
+      
         <NavigationContainer independent={true}>
           <Stack.Navigator
             screenOptions={{
@@ -55,6 +59,7 @@ export default function Swipes() {
               animation: "fade",
             }}
           >
+            <Stack.Screen name="Start Page" component={Start} />
             <Stack.Screen name="SwipeScreen" component={SwipeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
