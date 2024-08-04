@@ -100,6 +100,7 @@ export default function Swipe() {
     );
     let suggestedSwipeData = await suggestedSwipeResult.json();
     let suggestedSwipe = suggestedSwipeData.docs[0];
+    console.log(suggestedSwipeData.docs[0])
     return <FormatSuggestedSwipeData suggestedSwipe={suggestedSwipe} currentIndex={index} />;
   }
 
@@ -120,7 +121,7 @@ export default function Swipe() {
             : "No description available"}
         </Text>
       </View>
-      <Button title="Next" onPress={() => ShowSuggestedSwipes(currentIndex+1)} />
+      <Button title="Next" onPress={() => setSuggestedSwipeOutput(ShowSuggestedSwipes(currentIndex+1))} />
       </View>
     );
   }
@@ -234,9 +235,7 @@ export default function Swipe() {
                     </View>
                   ) : null;
                 })
-              ) : (
-                suggestedSwipeOutput
-              )}
+              ) :  suggestedSwipeOutput}
             </View>
           </TouchableWithoutFeedback>
         </SafeAreaView>
