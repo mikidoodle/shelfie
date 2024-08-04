@@ -20,7 +20,7 @@ import Library from "./Library";
 import Settings from "./Settings";
 import styles from "../../assets/styles/style";
 import Bulletin from "./Bulletin";
-import Index from "../index";
+import Swipe from "./Swipe";
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
@@ -61,7 +61,7 @@ export default function Home() {
             <Icon name="telescope" type="octicon" color={color} />
           ),
         }} />
-        <Tab.Screen name="Swipe" component={Index} options={{
+        <Tab.Screen name="Swipe" component={Swipe} options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="heart" type="octicon" color={color} />
           ),
