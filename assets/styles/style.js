@@ -72,6 +72,16 @@ export default styles = StyleSheet.create({
     },
     shadowOpacity: 0.5,
   },
+  exploreInput: {
+    height: 50,
+    borderWidth: 0,
+    borderColor: "lightgrey",
+    padding: 10,
+    width: "60%",
+    borderRadius: 0,
+    backgroundColor: "white",
+    borderLeftWidth: 2,
+  },
   button: {
     padding: 5,
     borderRadius: 9,

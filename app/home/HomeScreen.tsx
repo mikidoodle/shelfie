@@ -53,6 +53,7 @@ export default function HomeScreen() {
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
   let [modalContent, setModalContent] = useState<ReactElement>();
+
   let [reviewTitle, setReviewTitle] = useState<string>("");
   let [reviewContent, setReviewContent] = useState<string>("");
   function searchBooks(query: string) {
@@ -76,7 +77,9 @@ export default function HomeScreen() {
               description: Object.keys(book).includes("first_sentence")
                 ? book.first_sentence[0]
                 : "No description available",
-              etag: Object.keys(book).includes("cover_edition_key") ? book.cover_edition_key : "",
+              etag: Object.keys(book).includes("cover_edition_key")
+                ? book.cover_edition_key
+                : "",
               category: book.subject || [],
             };
             mapSearchResults.push(bookInfo);
@@ -99,7 +102,6 @@ export default function HomeScreen() {
   }, []);
 
   function submitReview(book: Book) {
-    console.log(reviewContent);
     fetch("http://localhost:3000/api/addReview", {
       method: "POST",
       headers: {
@@ -120,14 +122,11 @@ export default function HomeScreen() {
           return;
         } else {
           Alert.alert(data.message);
-          //TODO: navigate to review thru data.postuuid
-          setReviewContent("");
-          setReviewTitle("");
           setModalVisible(false);
         }
       });
   }
-  async function startReview(book: Book) {
+  const startReview = async (book: Book) => {
     setModalContent(
       <View>
         {book.etag !== "" ? (
@@ -172,7 +171,8 @@ export default function HomeScreen() {
                 borderRadius: 9,
               }}
               onPress={() => {
-                submitReview(book);
+                let e = submitReview.bind(book);
+                e(book);
               }}
             >
               <Text
@@ -199,7 +199,7 @@ export default function HomeScreen() {
       </View>
     );
     setModalVisible(true);
-  }
+  };
   async function addISBN(book: Book) {
     let uuidC = await get("uuid");
     console.log(uuidC);
@@ -280,7 +280,10 @@ export default function HomeScreen() {
                 <TextInput
                   style={styles.reviewTitleInput}
                   placeholder="Title"
-                  onChangeText={(text) => {setReviewTitle(text);console.log(reviewTitle)}}
+                  onChangeText={(text) => {
+                    setReviewTitle(text);
+                    console.log(reviewTitle);
+                  }}
                   value={reviewTitle}
                   keyboardType="default"
                   autoCapitalize="none"
@@ -288,7 +291,10 @@ export default function HomeScreen() {
                 <TextInput
                   style={styles.reviewContentInput}
                   placeholder="Write your review here!"
-                  onChangeText={(text) => setReviewContent(text)}
+                  onChangeText={(text) => {
+                    setReviewContent(text);
+                    console.log(reviewContent);
+                  }}
                   value={reviewContent}
                   keyboardType="default"
                   autoCapitalize="none"

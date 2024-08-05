@@ -47,6 +47,8 @@ type Review = {
 };
 export default function Bulletin() {
   let [searchQuery, setSearchQuery] = useState<string>("");
+  let [searchMode, setSearchMode] = useState<number>(0);
+  let [cancelSearch, setCancelSearch] = useState<boolean>(false);
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
   let [searchResults, setSearchResults] = useState<Review[]>([]);
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function Bulletin() {
       },
       body: JSON.stringify({
         uuid: uuid,
+        query: searchQuery
       }),
     })
       .then((response) => response.json())
@@ -69,9 +72,9 @@ export default function Bulletin() {
         if (data.reviews.length === 0) {
           setSearchResults([
             {
-              title: "No reviews",
+              title: searchQuery ==="" ?  "No reviews yet!" : "No reviews found :(",
               content:
-                "Add books to your library by scanning the barcode on the back of the book",
+                searchQuery ==="" ? "Write one of your own from the home screen!" : "",
               meta: {
                 title: "",
                 authors: "",
@@ -135,6 +138,108 @@ export default function Bulletin() {
               </View>
               <View
                 style={{
+                  flexDirection: "row",
+                  marginTop: 10,
+                  margin: "auto",
+                  width: "100%",
+                  shadowColor: "#37B7C3",
+                  shadowRadius: 20,
+                  shadowOffset: {
+                    width: 0,
+                    height: 0,
+                  },
+                  shadowOpacity: 0.5,
+                }}
+              >
+                <Pressable
+                  style={{
+                    borderRadius: 9,
+                    borderBottomRightRadius: 0,
+                    borderTopRightRadius: 0,
+                    padding: 10,
+                    backgroundColor: "white",
+                  }}
+                  onPress={() => {
+                    setSearchMode(searchMode === 0 ? 1 : 0);
+                  }}
+                >
+                  {searchMode === 0 ? (
+                    <Icon
+                      name="mention"
+                      type="octicon"
+                      size={24}
+                      style={{
+                        verticalAlign: "middle",
+                        marginTop: 2,
+                      }}
+                      color={"black"}
+                    />
+                  ) : (
+                    <Icon
+                      name="pencil"
+                      type="octicon"
+                      size={24}
+                      style={{
+                        verticalAlign: "middle",
+                        margin: 2,
+                        marginRight: 1.5,
+                        marginLeft: 1,
+                        marginBottom: 0,
+                      }}
+                      color={"black"}
+                    />
+                  )}
+                </Pressable>
+                <TextInput
+                  style={styles.exploreInput}
+                  placeholder={`Search for a ${
+                    searchMode === 0 ? "user" : "book review"
+                  }!`}
+                  onChangeText={(text) => {setCancelSearch(text.trim() !== "");setSearchQuery(text);searchBooks()}}
+                  value={searchQuery}
+                />
+                <Pressable
+                  style={{
+                    borderRadius: 9,
+                    borderBottomLeftRadius: 0,
+                    borderTopLeftRadius: 0,
+                    padding: 10,
+                    backgroundColor: "white",
+                  }}
+                  onPress={() => {
+                    setSearchQuery("")
+                    setCancelSearch(!cancelSearch);
+                  }}
+                >
+                  {cancelSearch ? (
+                    <Icon
+                      name="x"
+                      type="octicon"
+                      size={24}
+                      style={{
+                        verticalAlign: "middle",
+                        margin: 4,
+                        marginBottom: 0,
+                        marginTop: 2,
+                      }}
+                      color={"black"}
+                    />
+                  ) : (
+                    <Icon
+                      name="search"
+                      type="octicon"
+                      size={24}
+                      style={{
+                        verticalAlign: "middle",
+                        margin: 2,
+                      }}
+                      color={"black"}
+                    />
+                  )}
+                </Pressable>
+              </View>
+              <View
+                style={{
                   alignItems: "center",
                   justifyContent: "center",
                   width: "90%",
@@ -181,7 +286,7 @@ export default function Bulletin() {
                           {review.meta.etag !== "" ? (
                             <Image
                               source={{
-                                uri: `https://covers.openlibrary.org/b/isbn/${review.meta.etag}-M.jpg`,
+                                uri: `https://covers.openlibrary.org/b/olid/${review.meta.etag}-M.jpg`,
                               }}
                               style={{
                                 width: "100%",
@@ -207,7 +312,7 @@ export default function Bulletin() {
                               flexDirection: "row",
                               justifyContent: "flex-end",
                               gap: 10,
-                              margin: 5
+                              margin: 5,
                             }}
                           >
                             <Icon
@@ -222,7 +327,11 @@ export default function Bulletin() {
                               type="octicon"
                               size={26}
                               style={styles.titleIcon}
-                              color={myISBNs.includes(review.meta.etag) ? "grey" : "black"}
+                              color={
+                                myISBNs.includes(review.meta.etag)
+                                  ? "grey"
+                                  : "black"
+                              }
                             />
                           </View>
                         </View>
@@ -236,6 +345,7 @@ export default function Bulletin() {
                           width: 325,
                           alignItems: "center",
                         }}
+                        key={0}
                       >
                         <Text
                           style={{
@@ -243,11 +353,11 @@ export default function Bulletin() {
                             fontWeight: "bold",
                           }}
                         >
-                          No reviews yet!
+                          {review.title}
                         </Text>
                         <Text>
                           {" "}
-                          Write one of your own from the home screen!
+                         {review.content}
                         </Text>
                       </View>
                     )
