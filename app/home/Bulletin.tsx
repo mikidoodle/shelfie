@@ -47,13 +47,71 @@ type Review = {
 };
 export default function Bulletin() {
   let [searchQuery, setSearchQuery] = useState<string>("");
-  let [searchMode, setSearchMode] = useState<number>(0);
+  let [searchMode, setSearchMode] = useState<number>(1);
   let [cancelSearch, setCancelSearch] = useState<boolean>(false);
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
   let [searchResults, setSearchResults] = useState<Review[]>([]);
   useEffect(() => {
     searchBooks();
   }, []);
+  async function searchHandler() {
+    if (searchMode === 0) {
+      searchUsers();
+    } else {
+      searchBooks();
+    }
+  }
+
+  async function searchUsers() {
+    if (searchQuery.trim() === "") {
+      return;
+    }
+    setSearchResults([]);
+    fetch(`http://localhost:3000/api/getUsers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: searchQuery,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.users.length === 0) {
+          setSearchResults([
+            {
+              title: "No users found :(",
+              content: "",
+              meta: {
+                title: "",
+                authors: "",
+                etag: "404shelfieerror",
+              },
+              username: "",
+              uuid: "",
+            },
+          ]);
+          return;
+        }
+        let reviewResults: Review[] = [];
+        data.users.map((review: any) => {
+          var reviewData: Review = {
+            title: review.username,
+            content: review.reviewCount,
+            meta: {
+              title: "",
+              authors: review.libraryCount,
+              etag: "shelfieuser",
+            },
+            username: review.username,
+            uuid: review.uuid,
+          };
+          reviewResults.push(reviewData);
+        });
+        setSearchResults(reviewResults);
+      });
+  }
   async function searchBooks() {
     let uuid = await get("uuid");
     setSearchResults([]);
@@ -64,7 +122,7 @@ export default function Bulletin() {
       },
       body: JSON.stringify({
         uuid: uuid,
-        query: searchQuery
+        query: searchQuery,
       }),
     })
       .then((response) => response.json())
@@ -72,9 +130,12 @@ export default function Bulletin() {
         if (data.reviews.length === 0) {
           setSearchResults([
             {
-              title: searchQuery ==="" ?  "No reviews yet!" : "No reviews found :(",
+              title:
+                searchQuery === "" ? "No reviews yet!" : "No reviews found :(",
               content:
-                searchQuery ==="" ? "Write one of your own from the home screen!" : "",
+                searchQuery === ""
+                  ? "Write one of your own from the home screen!"
+                  : "",
               meta: {
                 title: "",
                 authors: "",
@@ -113,11 +174,8 @@ export default function Bulletin() {
       imageStyle={{ opacity: 0.6 }}
     >
       <ScrollView>
-        <SafeAreaView style={styles.container}>
-          <TouchableWithoutFeedback
-            onPress={Keyboard.dismiss}
-            accessible={false}
-          >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <SafeAreaView style={styles.container}>
             <View>
               <View
                 style={{
@@ -126,7 +184,7 @@ export default function Bulletin() {
                 }}
               >
                 <Text style={styles.title}>explore</Text>
-                <Pressable onPress={searchBooks}>
+                <Pressable onPress={searchHandler}>
                   <Icon
                     name="sync"
                     type="octicon"
@@ -142,6 +200,8 @@ export default function Bulletin() {
                   marginTop: 10,
                   margin: "auto",
                   width: "100%",
+                  backgroundColor: "white",
+                  borderRadius: 9,
                   shadowColor: "#37B7C3",
                   shadowRadius: 20,
                   shadowOffset: {
@@ -160,7 +220,10 @@ export default function Bulletin() {
                     backgroundColor: "white",
                   }}
                   onPress={() => {
-                    setSearchMode(searchMode === 0 ? 1 : 0);
+                    if (searchMode === 1) {
+                      searchBooks();
+                      setSearchMode(0);
+                    } else setSearchMode(searchMode === 0 ? 1 : 0);
                   }}
                 >
                   {searchMode === 0 ? (
@@ -192,10 +255,22 @@ export default function Bulletin() {
                 </Pressable>
                 <TextInput
                   style={styles.exploreInput}
+                  onSubmitEditing={() => {
+                    setCancelSearch(true);
+                    searchHandler();
+                  }}
                   placeholder={`Search for a ${
                     searchMode === 0 ? "user" : "book review"
                   }!`}
-                  onChangeText={(text) => {setCancelSearch(text.trim() !== "");setSearchQuery(text);searchBooks()}}
+                  onChangeText={(text) => {
+                    setSearchQuery(text);
+                    if (text.trim() === "") {
+                      searchHandler();
+                    } else {
+                      setCancelSearch(false);
+                      setSearchQuery(text);
+                    }
+                  }}
                   value={searchQuery}
                 />
                 <Pressable
@@ -207,8 +282,14 @@ export default function Bulletin() {
                     backgroundColor: "white",
                   }}
                   onPress={() => {
-                    setSearchQuery("")
-                    setCancelSearch(!cancelSearch);
+                    if (cancelSearch) {
+                      setSearchQuery("");
+                      searchHandler();
+                      setCancelSearch(false);
+                    } else {
+                      setCancelSearch(true);
+                      searchHandler();
+                    }
                   }}
                 >
                   {cancelSearch ? (
@@ -248,22 +329,22 @@ export default function Bulletin() {
                 {searchResults.length > 0 ? (
                   searchResults.map((review: Review, index: number) =>
                     review.meta.etag !== "404shelfieerror" ? (
-                      <View
-                        style={{
-                          backgroundColor: "white",
-                          margin: 10,
-                          borderRadius: 9,
-                          width: 325,
-                        }}
-                        key={index}
-                      >
+                      review.meta.etag === "shelfieuser" ? (
                         <View
                           style={{
-                            padding: 10,
-                            shadowColor: "#37B7C3",
+                            backgroundColor: "white",
+                            margin: 10,
+                            borderRadius: 9,
+                            width: 325,
                           }}
+                          key={index}
                         >
-                          <Text>
+                          <View
+                            style={{
+                              padding: 10,
+                              shadowColor: "#37B7C3",
+                            }}
+                          >
                             <Text
                               style={{
                                 fontSize: 17,
@@ -272,70 +353,173 @@ export default function Bulletin() {
                               }}
                             >
                               {review.username}
-                            </Text>{" "}
-                            read:
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 15,
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {review.meta.title}
-                          </Text>
-                          {review.meta.etag !== "" ? (
-                            <Image
-                              source={{
-                                uri: `https://covers.openlibrary.org/b/olid/${review.meta.etag}-M.jpg`,
-                              }}
+                            </Text>
+                            <View
                               style={{
-                                width: "100%",
-                                height: 200,
-                                marginTop: 10,
-                                marginBottom: 10,
-                                borderRadius: 9,
-                                resizeMode: "cover",
+                                flexDirection: "row",
+                                gap: 5,
+                                justifyContent: 'space-between'
                               }}
-                            />
-                          ) : null}
-                          <Text
-                            style={{
-                              fontSize: 20,
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {review.title}
-                          </Text>
-                          <Text>{review.content}</Text>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "flex-end",
-                              gap: 10,
-                              margin: 5,
-                            }}
-                          >
-                            <Icon
-                              name="pencil"
-                              type="octicon"
-                              size={26}
-                              style={styles.titleIcon}
-                              color={"black"}
-                            />
-                            <Icon
-                              name={`bookmark`}
-                              type="octicon"
-                              size={26}
-                              style={styles.titleIcon}
-                              color={
-                                myISBNs.includes(review.meta.etag)
-                                  ? "grey"
-                                  : "black"
-                              }
-                            />
+                            >
+                              <View
+                                style={{
+                                  flexDirection: "column",
+                                  gap: 5,
+                                  borderRightWidth: 2,
+                                  borderColor: "lightgrey",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "50%"
+                                }}
+                              >
+                                <Text
+                                  style={{ fontWeight: "bold", fontSize: 24 }}
+                                >
+                                  {review.meta.authors}
+                                </Text>
+                                <Text>
+                                  book
+                                  {parseInt(review.meta.authors) > 1
+                                    ? "s"
+                                    : ""}{" "}
+                                  in library
+                                </Text>
+                              </View>
+                              <View
+                                style={{
+                                  flexDirection: "column",
+                                  gap: 5,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "50%"
+                                }}
+                              >
+                                <Text
+                                  style={{ fontWeight: "bold", fontSize: 24 }}
+                                >
+                                  {review.content}
+                                </Text>
+                                <Text>
+                                  review
+                                  {parseInt(review.content) > 1 ? "s" : ""}
+                                </Text>
+                              </View>
+                            </View>
+                            <Pressable
+                              style={{
+                                flexDirection: "row",
+                                gap: 5,
+                                padding: 5,
+                                paddingTop: 10,
+                                margin: 'auto',
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Icon
+                                name="pencil"
+                                type="octicon"
+                                size={20}
+                                style={{
+                                  verticalAlign: "middle",
+                                }}
+                                color={"#37B7C3"}
+                              />
+                              <Text style={{ color: "#37B7C3" }}>
+                                View Profile
+                              </Text>
+                            </Pressable>
                           </View>
                         </View>
-                      </View>
+                      ) : (
+                        <View
+                          style={{
+                            backgroundColor: "white",
+                            margin: 10,
+                            borderRadius: 9,
+                            width: 325,
+                          }}
+                          key={index}
+                        >
+                          <View
+                            style={{
+                              padding: 10,
+                              shadowColor: "#37B7C3",
+                            }}
+                          >
+                            <Text>
+                              <Text
+                                style={{
+                                  fontSize: 17,
+                                  fontWeight: "bold",
+                                  color: "#37B7C3",
+                                }}
+                              >
+                                {review.username}
+                              </Text>{" "}
+                              read:
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {review.meta.title}
+                            </Text>
+                            {review.meta.etag !== "" ? (
+                              <Image
+                                source={{
+                                  uri: `https://covers.openlibrary.org/b/olid/${review.meta.etag}-M.jpg`,
+                                }}
+                                style={{
+                                  width: "100%",
+                                  height: 200,
+                                  marginTop: 10,
+                                  marginBottom: 10,
+                                  borderRadius: 9,
+                                  resizeMode: "cover",
+                                }}
+                              />
+                            ) : null}
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {review.title}
+                            </Text>
+                            <Text>{review.content}</Text>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                gap: 10,
+                                margin: 5,
+                              }}
+                            >
+                              <Icon
+                                name="pencil"
+                                type="octicon"
+                                size={26}
+                                style={styles.titleIcon}
+                                color={"black"}
+                              />
+                              <Icon
+                                name={`bookmark`}
+                                type="octicon"
+                                size={26}
+                                style={styles.titleIcon}
+                                color={
+                                  myISBNs.includes(review.meta.etag)
+                                    ? "grey"
+                                    : "black"
+                                }
+                              />
+                            </View>
+                          </View>
+                        </View>
+                      )
                     ) : (
                       <View
                         style={{
@@ -355,10 +539,7 @@ export default function Bulletin() {
                         >
                           {review.title}
                         </Text>
-                        <Text>
-                          {" "}
-                         {review.content}
-                        </Text>
+                        <Text> {review.content}</Text>
                       </View>
                     )
                   )
@@ -379,8 +560,8 @@ export default function Bulletin() {
                 )}
               </View>
             </View>
-          </TouchableWithoutFeedback>
-        </SafeAreaView>
+          </SafeAreaView>
+        </TouchableWithoutFeedback>
       </ScrollView>
     </ImageBackground>
   );

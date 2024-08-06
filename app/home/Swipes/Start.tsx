@@ -53,7 +53,9 @@ export default function Start({
   navigation: any;
   route: any;
 }) {
+  let [nextSwipeLoading, setNextSwipeLoading] = useState<boolean>(false);
   async function startSwiping() {
+    setNextSwipeLoading(true);
     let uuid = await get("uuid");
     fetch(`http://localhost:3000/api/getSwipes`, {
       method: "POST",
@@ -66,19 +68,27 @@ export default function Start({
     })
       .then((response) => response.json())
       .then((response) => {
-          let swipeSuggestions = JSON.parse(response.message);
+          let swipeSuggestionsUF = JSON.parse(response.message);
+          let swipeSuggestions: any = [];
+              for (let i = 0; i < swipeSuggestionsUF.length; i++) {
+                swipeSuggestions.push({
+                  title: swipeSuggestionsUF[i],
+                  feedback: ""
+                });
+              }
           console.log(`https://openlibrary.org/search.json?title=${encodeURIComponent(
-              swipeSuggestions[0]
+              swipeSuggestions[0].title
             )}`)
           fetch(
             `https://openlibrary.org/search.json?title=${encodeURIComponent(
-              swipeSuggestions[0]
+              swipeSuggestions[0].title
             )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
           )
             .then((response) => response.json())
             .then((response) => {
+              setNextSwipeLoading(false);
               let book = response.docs[0];
-              let category = book.subject || [];
+              let category = Object.keys(book).includes("subject") ? book.subject : [];
               category = category.slice(0, 3);
               var bookInfo: Book = {
                 title: book.title,
@@ -91,6 +101,7 @@ export default function Start({
                 etag: Object.keys(book).includes("cover_edition_key") ? book.cover_edition_key : "",
                 category: category.join(', '),
               };
+              
               navigation.navigate("SwipeScreen", {
                 book: bookInfo,
                 swipeSuggestions: swipeSuggestions,
@@ -187,7 +198,7 @@ export default function Start({
                     margin: "auto",
                   }}
                 >
-                  Start swiping!
+                  {nextSwipeLoading ? "loading today's swipes..." : "start swiping!"}
                 </Text>
               </View>
             </Pressable>

@@ -54,43 +54,74 @@ export default function SwipeScreen({
   route: any;
 }) {
   let { book, swipeSuggestions, currentIndex } = route.params;
-  let [nextSwipeLoading, setNextSwipeLoading] = useState<boolean>(false);
-  function loadNextBook() {
-    console.log("loading next book");
-    setNextSwipeLoading(true);
-    console.log(
-      `https://openlibrary.org/search.json?title=${encodeURIComponent(
-        swipeSuggestions[currentIndex + 1]
-      )}`
-    );
-    fetch(
-      `https://openlibrary.org/search.json?title=${encodeURIComponent(
-        swipeSuggestions[currentIndex + 1]
-      )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&language=eng`
-    )
-      .then((response) => response.json())
-      .then((response) => {
-        let book = response.docs[0];
-        let category = book.subject || [];
-        category = category.slice(0, 3);
-        var bookInfo: Book = {
-          title: book.title,
-          authors: Object.keys(book).includes("author_name")
-            ? book.author_name[0]
-            : "",
-          description: Object.keys(book).includes("first_sentence")
-            ? book.first_sentence[0]
-            : "No description available",
-          etag: Object.keys(book).includes("cover_edition_key") ? book.cover_edition_key : "",
-          category: category.join(", "),
-        };
-        setNextSwipeLoading(false);
-        navigation.navigate("SwipeScreen", {
-          book: bookInfo,
-          swipeSuggestions: swipeSuggestions,
-          currentIndex: currentIndex + 1,
+  let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
+  console.log(swipeSuggestions);
+  async function loadNextBook(feedback: string) {
+    if (currentIndex === swipeSuggestions.length - 1) {
+      setNextSwipeLoading(1);
+      swipeSuggestions[currentIndex].title = book.title;
+      swipeSuggestions[currentIndex].feedback = feedback;
+      swipeSuggestions[currentIndex] = JSON.stringify(swipeSuggestions[currentIndex]);
+      let uuid = await get("uuid");
+      fetch(`http://localhost:3000/api/saveSwipes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uuid: uuid,
+          swipes: JSON.stringify(swipeSuggestions),
+        }),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.error === false) {
+            setNextSwipeLoading(2);
+          }
         });
-      });
+    } else {
+      console.log("loading next book");
+      setNextSwipeLoading(1);
+      console.log(
+        `https://openlibrary.org/search.json?title=${encodeURIComponent(
+          swipeSuggestions[currentIndex + 1].title
+        )}`
+      );
+      fetch(
+        `https://openlibrary.org/search.json?title=${encodeURIComponent(
+          swipeSuggestions[currentIndex + 1].title
+        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&language=eng`
+      )
+        .then((response) => response.json())
+        .then((response) => {
+          let book = response.docs[0];
+          let category = Object.keys(book).includes("subject") ? book.subject : [];
+          category = category.slice(0, 3);
+          var bookInfo: Book = {
+            title: book.title,
+            authors: Object.keys(book).includes("author_name")
+              ? book.author_name[0]
+              : "",
+            description: Object.keys(book).includes("first_sentence")
+              ? book.first_sentence[0]
+              : "No description available",
+            etag: Object.keys(book).includes("cover_edition_key")
+              ? book.cover_edition_key
+              : "",
+            category: category.join(", "),
+          };
+          swipeSuggestions[currentIndex].title = book.title;
+          swipeSuggestions[currentIndex].feedback = feedback;
+          //stringify current index
+          swipeSuggestions[currentIndex] = JSON.stringify(swipeSuggestions[currentIndex]);
+          setNextSwipeLoading(0);
+          navigation.navigate("SwipeScreen", {
+            book: bookInfo,
+            swipeSuggestions: swipeSuggestions,
+            currentIndex: currentIndex + 1,
+          });
+        });
+    }
   }
   return (
     <ImageBackground
@@ -104,14 +135,15 @@ export default function SwipeScreen({
             fontSize: 32,
             color: "black",
             fontWeight: "bold",
+            marginBottom: 10,
           }}
         >
           swipe
         </Text>
-        {nextSwipeLoading ? (
+        {nextSwipeLoading === 1 ? (
           <View
             style={{
-              height: "80%",
+              height: "75%",
               width: "90%",
               margin: "auto",
               backgroundColor: "#f8f8f8",
@@ -119,12 +151,35 @@ export default function SwipeScreen({
               borderWidth: 2,
               borderRadius: 20,
               marginBottom: 10,
-              flex:1,
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
             <Text style={styles.title}>Loading...</Text>
+          </View>
+        ) : nextSwipeLoading === 2 ? (
+          <View
+            style={{
+              height: "75%",
+              width: "90%",
+              margin: "auto",
+              backgroundColor: "#f8f8f8",
+              borderColor: "white",
+              borderWidth: 2,
+              borderRadius: 20,
+              marginBottom: 10,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{
+              fontSize: 34,
+              fontWeight: "bold",
+              textAlign: 'center'
+            }}>Today's swipes are done!</Text>
+            <Text>Check back tomorrow for more.</Text>
           </View>
         ) : (
           <>
@@ -136,7 +191,7 @@ export default function SwipeScreen({
                 backgroundColor: "#f8f8f8",
                 borderColor: "white",
                 borderWidth: 2,
-                borderRadius: 20,
+                borderRadius: 25,
                 marginBottom: 10,
               }}
             >
@@ -161,7 +216,7 @@ export default function SwipeScreen({
                   margin: 20,
                   marginTop: 0,
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 20,
                 }}
               >
                 <Text style={{ fontSize: 20 }}>{book.authors}</Text>
@@ -184,6 +239,9 @@ export default function SwipeScreen({
                   borderWidth: 1,
                   padding: 5,
                 }}
+                onPress={() => {
+                  loadNextBook("dislike");
+                }}
               >
                 <Icon
                   name="x-circle-fill"
@@ -205,7 +263,9 @@ export default function SwipeScreen({
                   borderWidth: 1,
                   padding: 5,
                 }}
-                onPress={loadNextBook}
+                onPress={() => {
+                  loadNextBook("neutral");
+                }}
               >
                 <Icon
                   name="feed-repo"
@@ -226,7 +286,9 @@ export default function SwipeScreen({
                   borderWidth: 2,
                   padding: 5,
                 }}
-                onPress={loadNextBook}
+                onPress={() => {
+                  loadNextBook("like");
+                }}
               >
                 <Icon
                   name="feed-heart"

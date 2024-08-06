@@ -47,7 +47,7 @@ type Book = {
 
 export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
-  let [searchStatusModal, setSearchStatusModal] = useState<string>("search");
+  let [isSearching, setIsSearching] = useState<boolean>(false);
   let [username, setUsername] = useState<any>("");
   let [uuid, setUUID] = useState<any>("");
   let [searchResults, setSearchResults] = useState<Book[]>([]);
@@ -58,12 +58,12 @@ export default function HomeScreen() {
   let [reviewContent, setReviewContent] = useState<string>("");
   function searchBooks(query: string) {
     if (query.length > 0) {
-      setSearchStatusModal("searching...");
+      setIsSearching(true);
       setSearchResults([]);
       fetch(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           query
-        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=50&lang=en`
+        )}&lang=en&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=20`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -85,7 +85,7 @@ export default function HomeScreen() {
             mapSearchResults.push(bookInfo);
           });
           setSearchResults(mapSearchResults);
-          setSearchStatusModal("find another book!");
+          setIsSearching(false);
         });
     } else {
       setSearchResults([]);
@@ -237,113 +237,133 @@ export default function HomeScreen() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <GestureRecognizer
-        onSwipeDown={() => {
-          if (modalVisible) {
-            setModalVisible(false);
-          }
-        }}
-        style={{
-          flex: 1,
-        }}
-      >
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <GestureRecognizer
+          onSwipeDown={() => {
+            if (modalVisible) {
+              setModalVisible(false);
+            }
+          }}
+          style={{
+            flex: 1,
           }}
         >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-              borderTopRightRadius: 25,
-              borderTopLeftRadius: 25,
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
             }}
           >
             <View
               style={{
-                top: 0,
-                height: "90%",
-                width: "100%",
-                padding: 0,
+                flex: 1,
+                justifyContent: "flex-end",
+                alignItems: "flex-end",
                 borderTopRightRadius: 25,
                 borderTopLeftRadius: 25,
-                backgroundColor: "#f9f9f9",
               }}
             >
-              {modalContent}
-              <ScrollView style={{ height: "100%" }}>
-                <TextInput
-                  style={styles.reviewTitleInput}
-                  placeholder="Title"
-                  onChangeText={(text) => {
-                    setReviewTitle(text);
-                    console.log(reviewTitle);
-                  }}
-                  value={reviewTitle}
-                  keyboardType="default"
-                  autoCapitalize="none"
-                />
-                <TextInput
-                  style={styles.reviewContentInput}
-                  placeholder="Write your review here!"
-                  onChangeText={(text) => {
-                    setReviewContent(text);
-                    console.log(reviewContent);
-                  }}
-                  value={reviewContent}
-                  keyboardType="default"
-                  autoCapitalize="none"
-                  multiline={true}
-                  numberOfLines={4}
-                />
-              </ScrollView>
+              <View
+                style={{
+                  top: 0,
+                  height: "90%",
+                  width: "100%",
+                  padding: 0,
+                  borderTopRightRadius: 25,
+                  borderTopLeftRadius: 25,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                {modalContent}
+                <ScrollView style={{ height: "100%" }}>
+                  <TextInput
+                    style={styles.reviewTitleInput}
+                    placeholder="Title"
+                    onChangeText={(text) => {
+                      setReviewTitle(text);
+                      console.log(reviewTitle);
+                    }}
+                    value={reviewTitle}
+                    keyboardType="default"
+                    autoCapitalize="none"
+                  />
+                  <TextInput
+                    style={styles.reviewContentInput}
+                    placeholder="Write your review here!"
+                    onChangeText={(text) => {
+                      setReviewContent(text);
+                      console.log(reviewContent);
+                    }}
+                    value={reviewContent}
+                    keyboardType="default"
+                    autoCapitalize="none"
+                    multiline={true}
+                    numberOfLines={4}
+                  />
+                </ScrollView>
+              </View>
             </View>
-          </View>
-        </Modal>
-        <ScrollView>
-          <SafeAreaView style={styles.container}>
-            <TouchableWithoutFeedback
-              onPress={Keyboard.dismiss}
-              accessible={false}
-            >
+          </Modal>
+          <ScrollView>
+            <SafeAreaView style={styles.container}>
               <View>
                 <Text style={styles.title}>shelfie!</Text>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Type in a book name!"
-                  onChangeText={(text) => setSearchQuery(text)}
-                  value={searchQuery}
-                />
-                <Pressable
+                <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "center",
-                    gap: 5,
-                  }}
-                  onPress={() => {
-                    setSearchResults([]);
-                    searchBooks(searchQuery);
+                    marginTop: 10,
+                    margin: "auto",
+                    width: "100%",
+                    backgroundColor: "white",
+                    borderRadius: 9,
+                    shadowColor: "#37B7C3",
+                    shadowRadius: 20,
+                    shadowOffset: {
+                      width: 0,
+                      height: 0,
+                    },
+                    shadowOpacity: 0.5,
                   }}
                 >
-                  <Text style={{ fontSize: 20 }}>{searchStatusModal}</Text>
-                  <Icon
-                    name="search"
-                    type="octicon"
-                    size={20}
-                    style={{ verticalAlign: "middle", marginTop: 2 }}
-                    color={"black"}
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Type in a book name!"
+                    onChangeText={(text) => setSearchQuery(text)}
+                    value={searchQuery}
                   />
-                </Pressable>
+                  <Pressable
+                    style={{
+                      borderRadius: 0,
+                      borderLeftWidth: 2,
+                      borderColor: "lightgrey",
+                      borderBottomRightRadius: 9,
+                      borderTopRightRadius: 9,
+                      padding: 10,
+                      backgroundColor: isSearching ? "#f8f8f8" : "white",
+                    }}
+                    disabled={isSearching}
+                    onPress={() => {
+                      setSearchResults([]);
+                      searchBooks(searchQuery);
+                    }}
+                  >
+                    <Icon
+                      name="search"
+                      type="octicon"
+                      size={24}
+                      style={{ verticalAlign: "middle", marginTop: 2 }}
+                      color={isSearching ? "lightgrey" : "black"}
+                    />
+                  </Pressable>
+                </View>
                 <View
                   style={{
                     alignItems: "center",
-                    justifyContent: "center",
-                    width: "90%",
+                    flexDirection: "column",
+                    width: "100%",
+                    margin: "auto",
                   }}
                 >
                   {searchResults.length > 0 && searchQuery !== ""
@@ -353,7 +373,7 @@ export default function HomeScreen() {
                             backgroundColor: "white",
                             margin: 10,
                             borderRadius: 9,
-                            width: 325,
+                            width: "90%",
                           }}
                           key={index}
                         >
@@ -363,16 +383,15 @@ export default function HomeScreen() {
                                 uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
                               }}
                               style={{
-                                width: 325,
+                                width: "90%",
+                                margin: "auto",
                                 height: 150,
                                 borderTopLeftRadius: 9,
                                 borderTopRightRadius: 9,
                                 resizeMode: "cover",
                               }}
                             />
-                          ) : (
-                            <Text>No image available</Text>
-                          )}
+                          ) : null}
                           <View
                             style={{
                               padding: 10,
@@ -479,10 +498,10 @@ export default function HomeScreen() {
                     : null}
                 </View>
               </View>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </ScrollView>
-      </GestureRecognizer>
+            </SafeAreaView>
+          </ScrollView>
+        </GestureRecognizer>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
