@@ -18,7 +18,7 @@ import {
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
-import { Icon } from "@rneui/themed";
+import { Divider, Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 
 async function save(key: string, value: string) {

@@ -37,8 +37,10 @@ export default function Index() {
   let [changeEmail, onChangeEmail] = useState("");
 
   let [changePassword, onChangePassword] = useState("");
+  let [changePasswordConfirm, onChangePasswordConfirm] = useState("");
   let [isDisabled, setDisabled] = useState(false);
   function Signup() {
+    if(/^[a-zA-Z0-9._]{1,16}$/.test(changeUsername)) {
     setDisabled(true);
     fetch("http://localhost:3000/api/signup", {
       method: "POST",
@@ -49,6 +51,7 @@ export default function Index() {
         email: changeEmail,
         username: changeUsername,
         password: changePassword,
+        passwordConfirm: changePasswordConfirm,
       }),
     })
       .then((res) => res.json())
@@ -61,6 +64,9 @@ export default function Index() {
           router.replace("/");
         }
       });
+    } else {
+      Alert.alert("Username must be between 1 and 16 characters and only contain letters, numbers, periods, and underscores.");
+    }
   }
   return (
     <ImageBackground
@@ -68,8 +74,8 @@ export default function Index() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <SafeAreaView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView style={styles.container}>
           <View>
             <View
               style={{
@@ -119,9 +125,18 @@ export default function Index() {
                 secureTextEntry={true}
                 autoCapitalize="none"
               />
+              <TextInput
+                style={styles.input}
+                onChangeText={onChangePasswordConfirm}
+                value={changePasswordConfirm}
+                placeholder="password: the sequel"
+                secureTextEntry={true}
+                autoCapitalize="none"
+              />
               <Pressable
                 style={isDisabled ? styles.disabledButton : styles.button}
                 disabled={isDisabled}
+                onPress={Signup}
               >
                 <Text
                   style={styles.buttonText}
@@ -146,8 +161,9 @@ export default function Index() {
               </View>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        
       </SafeAreaView>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
