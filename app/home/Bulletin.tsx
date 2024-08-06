@@ -20,7 +20,7 @@ let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
 import { Divider, Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
-
+import ReviewItem from "../../components/ReviewItem"
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -44,12 +44,14 @@ type Review = {
   };
   username: string;
   uuid: string;
+  liked: string[];
 };
 export default function Bulletin() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [searchMode, setSearchMode] = useState<number>(1);
   let [cancelSearch, setCancelSearch] = useState<boolean>(false);
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
+  let [userUUID, setUserUUID] = useState<any>();
   let [searchResults, setSearchResults] = useState<Review[]>([]);
   useEffect(() => {
     searchBooks();
@@ -90,6 +92,7 @@ export default function Bulletin() {
               },
               username: "",
               uuid: "",
+              liked: []
             },
           ]);
           return;
@@ -106,6 +109,7 @@ export default function Bulletin() {
             },
             username: review.username,
             uuid: review.uuid,
+            liked: [],
           };
           reviewResults.push(reviewData);
         });
@@ -114,6 +118,7 @@ export default function Bulletin() {
   }
   async function searchBooks() {
     let uuid = await get("uuid");
+    setUserUUID(uuid);
     setSearchResults([]);
     fetch(`http://localhost:3000/api/getReviews`, {
       method: "POST",
@@ -143,6 +148,7 @@ export default function Bulletin() {
               },
               username: "",
               uuid: "",
+              liked: []
             },
           ]);
           return;
@@ -160,6 +166,7 @@ export default function Bulletin() {
             },
             username: review.username,
             uuid: review.uuid,
+            liked: review.liked,
           };
           reviewResults.push(reviewData);
         });
@@ -431,94 +438,7 @@ export default function Bulletin() {
                           </View>
                         </View>
                       ) : (
-                        <View
-                          style={{
-                            backgroundColor: "white",
-                            margin: 10,
-                            borderRadius: 9,
-                            width: 325,
-                          }}
-                          key={index}
-                        >
-                          <View
-                            style={{
-                              padding: 10,
-                              shadowColor: "#37B7C3",
-                            }}
-                          >
-                            <Text>
-                              <Text
-                                style={{
-                                  fontSize: 17,
-                                  fontWeight: "bold",
-                                  color: "#37B7C3",
-                                }}
-                              >
-                                {review.username}
-                              </Text>{" "}
-                              read:
-                            </Text>
-                            <Text
-                              style={{
-                                fontSize: 15,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {review.meta.title}
-                            </Text>
-                            {review.meta.etag !== "" ? (
-                              <Image
-                                source={{
-                                  uri: `https://covers.openlibrary.org/b/olid/${review.meta.etag}-M.jpg`,
-                                }}
-                                style={{
-                                  width: "100%",
-                                  height: 200,
-                                  marginTop: 10,
-                                  marginBottom: 10,
-                                  borderRadius: 9,
-                                  resizeMode: "cover",
-                                }}
-                              />
-                            ) : null}
-                            <Text
-                              style={{
-                                fontSize: 20,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {review.title}
-                            </Text>
-                            <Text>{review.content}</Text>
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "flex-end",
-                                gap: 10,
-                                margin: 5,
-                              }}
-                            >
-                              <Icon
-                                name="pencil"
-                                type="octicon"
-                                size={26}
-                                style={styles.titleIcon}
-                                color={"black"}
-                              />
-                              <Icon
-                                name={`bookmark`}
-                                type="octicon"
-                                size={26}
-                                style={styles.titleIcon}
-                                color={
-                                  myISBNs.includes(review.meta.etag)
-                                    ? "grey"
-                                    : "black"
-                                }
-                              />
-                            </View>
-                          </View>
-                        </View>
+                        <ReviewItem review={review} key={index} uuid={userUUID} />
                       )
                     ) : (
                       <View

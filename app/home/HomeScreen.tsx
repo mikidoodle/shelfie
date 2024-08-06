@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
@@ -53,20 +53,25 @@ export default function HomeScreen() {
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
   let [modalContent, setModalContent] = useState<ReactElement>();
+  let [reviewTitle, setReviewTitle] = useState<string>('');
+  let [reviewContent, setReviewContent] = useState<string>('');
 
-  let [reviewTitle, setReviewTitle] = useState<string>("");
-  let [reviewContent, setReviewContent] = useState<string>("");
+  let reviewTitleRef = useRef<any>(null);
+  let reviewContentRef = useRef<any>(null);
   function searchBooks(query: string) {
+    
     if (query.length > 0) {
+      console.log("search: accepted");
       setIsSearching(true);
       setSearchResults([]);
       fetch(
-        `https://openlibrary.org/search.json?title=${encodeURIComponent(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(
           query
         )}&lang=en&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=20`
       )
         .then((response) => response.json())
         .then((data) => {
+          console.log("search: data");
           let mapSearchResults: Book[] = [];
           data.docs.map((book: any) => {
             var bookInfo: Book = {
@@ -84,6 +89,15 @@ export default function HomeScreen() {
             };
             mapSearchResults.push(bookInfo);
           });
+          if (mapSearchResults.length === 0) {
+            mapSearchResults.push({
+              title: "No results found",
+              authors: "",
+              description: "Try searching for something else!",
+              etag: "404shelfieerror",
+              category: [],
+            });
+          }
           setSearchResults(mapSearchResults);
           setIsSearching(false);
         });
@@ -101,8 +115,8 @@ export default function HomeScreen() {
     })();
   }, []);
 
-  function submitReview(book: Book) {
-    fetch("http://localhost:3000/api/addReview", {
+  async function submitReview(book: Book) {
+    var res = await fetch("http://localhost:3000/api/addReview", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -115,16 +129,14 @@ export default function HomeScreen() {
         username: username,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          Alert.alert(data.message);
-          return;
-        } else {
-          Alert.alert(data.message);
-          setModalVisible(false);
-        }
-      });
+    let data = await res.json();
+    if (data.error) {
+      Alert.alert(data.message);
+      return;
+    } else {
+      Alert.alert(data.message);
+      setModalVisible(false);
+    }
   }
   const startReview = async (book: Book) => {
     setModalContent(
@@ -170,9 +182,10 @@ export default function HomeScreen() {
                 padding: 10,
                 borderRadius: 9,
               }}
-              onPress={() => {
-                let e = submitReview.bind(book);
-                e(book);
+              onPress={async () => {
+                setModalVisible(false);
+                setModalVisible(true);
+                await submitReview(book);
               }}
             >
               <Text
@@ -285,10 +298,11 @@ export default function HomeScreen() {
                       setReviewTitle(text);
                       console.log(reviewTitle);
                     }}
-                    value={reviewTitle}
+                    defaultValue={reviewTitle}
                     keyboardType="default"
                     autoCapitalize="none"
                   />
+                  <Text>{reviewTitle}</Text>
                   <TextInput
                     style={styles.reviewContentInput}
                     placeholder="Write your review here!"
@@ -296,12 +310,13 @@ export default function HomeScreen() {
                       setReviewContent(text);
                       console.log(reviewContent);
                     }}
-                    value={reviewContent}
+                    defaultValue={reviewContent}
                     keyboardType="default"
                     autoCapitalize="none"
                     multiline={true}
                     numberOfLines={4}
                   />
+                  <Text>{reviewContent}</Text>
                 </ScrollView>
               </View>
             </View>
@@ -361,140 +376,158 @@ export default function HomeScreen() {
                 <View
                   style={{
                     alignItems: "center",
-                    flexDirection: "column",
-                    width: "100%",
-                    margin: "auto",
                   }}
                 >
                   {searchResults.length > 0 && searchQuery !== ""
-                    ? searchResults.map((book: Book, index: number) => (
-                        <View
-                          style={{
-                            backgroundColor: "white",
-                            margin: 10,
-                            borderRadius: 9,
-                            width: "90%",
-                          }}
-                          key={index}
-                        >
-                          {book.etag !== "" ? (
-                            <Image
-                              source={{
-                                uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
-                              }}
-                              style={{
-                                width: "90%",
-                                margin: "auto",
-                                height: 150,
-                                borderTopLeftRadius: 9,
-                                borderTopRightRadius: 9,
-                                resizeMode: "cover",
-                              }}
-                            />
-                          ) : null}
+                    ? searchResults.map((book: Book, index: number) =>
+                        book.etag !== "404shelfieerror" ? (
                           <View
                             style={{
-                              padding: 10,
-                              shadowColor: "#37B7C3",
+                              backgroundColor: "white",
+                              margin: 10,
+                              borderRadius: 9,
+                              width: "90%",
+                            }}
+                            key={index}
+                          >
+                            {book.etag !== "" ? (
+                              <Image
+                                source={{
+                                  uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
+                                }}
+                                style={{
+                                  width: "100%",
+                                  margin: "auto",
+                                  height: 150,
+                                  borderTopLeftRadius: 9,
+                                  borderTopRightRadius: 9,
+                                  resizeMode: "cover",
+                                }}
+                              />
+                            ) : null}
+                            <View
+                              style={{
+                                padding: 10,
+                                shadowColor: "#37B7C3",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 20,
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {book.title}
+                              </Text>
+                              <Text
+                                style={{
+                                  fontFamily: "Menlo",
+                                  textTransform: "uppercase",
+                                  paddingBottom: 5,
+                                  paddingTop: 5,
+                                }}
+                              >
+                                {book.authors}
+                              </Text>
+                              <Text>{book.description}</Text>
+                            </View>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "space-evenly",
+                                gap: 5,
+                                borderBottomLeftRadius: 9,
+                                borderBottomRightRadius: 9,
+                                borderWidth: 2,
+                                borderColor: "#37B7C3",
+                              }}
+                            >
+                              <Pressable
+                                style={{
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  gap: 5,
+                                  margin: 10,
+                                }}
+                                onPress={() => startReview(book)}
+                              >
+                                <Icon
+                                  name="pencil"
+                                  type="octicon"
+                                  size={20}
+                                  style={{
+                                    verticalAlign: "middle",
+                                    marginTop: 2,
+                                  }}
+                                  color={"#37B7C3"}
+                                />
+                                <Text
+                                  style={{
+                                    fontSize: 20,
+                                    color: "#37B7C3",
+                                  }}
+                                >
+                                  review
+                                </Text>
+                              </Pressable>
+                              <View
+                                style={{
+                                  height: "100%",
+                                  width: 2,
+                                  backgroundColor: "#37B7C3",
+                                }}
+                              />
+                              <Pressable
+                                style={{
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  gap: 5,
+                                  margin: 10,
+                                }}
+                                onPress={() => addISBN(book)}
+                              >
+                                <Icon
+                                  name="heart"
+                                  type="octicon"
+                                  size={20}
+                                  style={{
+                                    verticalAlign: "middle",
+                                    marginTop: 2,
+                                  }}
+                                  color={"#37B7C3"}
+                                />
+                                <Text
+                                  style={{
+                                    fontSize: 20,
+                                    color: "#37B7C3",
+                                  }}
+                                >
+                                  add to shelf
+                                </Text>
+                              </Pressable>
+                            </View>
+                          </View>
+                        ) : (
+                          <View
+                            style={{
+                              marginTop: 50,
                             }}
                           >
                             <Text
                               style={{
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight: "bold",
+                                textAlign: "center",
                               }}
                             >
                               {book.title}
                             </Text>
-                            <Text
-                              style={{
-                                fontFamily: "Menlo",
-                                textTransform: "uppercase",
-                                paddingBottom: 5,
-                                paddingTop: 5,
-                              }}
-                            >
-                              {book.authors}
+                            <Text style={{ textAlign: "center" }}>
+                              {book.description}
                             </Text>
-                            <Text>{book.description}</Text>
                           </View>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-evenly",
-                              gap: 5,
-                              borderBottomLeftRadius: 9,
-                              borderBottomRightRadius: 9,
-                              borderWidth: 2,
-                              borderColor: "#37B7C3",
-                            }}
-                          >
-                            <Pressable
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                gap: 5,
-                                margin: 10,
-                              }}
-                              onPress={() => startReview(book)}
-                            >
-                              <Icon
-                                name="pencil"
-                                type="octicon"
-                                size={20}
-                                style={{
-                                  verticalAlign: "middle",
-                                  marginTop: 2,
-                                }}
-                                color={"#37B7C3"}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: 20,
-                                  color: "#37B7C3",
-                                }}
-                              >
-                                review
-                              </Text>
-                            </Pressable>
-                            <View
-                              style={{
-                                height: "100%",
-                                width: 2,
-                                backgroundColor: "#37B7C3",
-                              }}
-                            />
-                            <Pressable
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                gap: 5,
-                                margin: 10,
-                              }}
-                              onPress={() => addISBN(book)}
-                            >
-                              <Icon
-                                name="heart"
-                                type="octicon"
-                                size={20}
-                                style={{
-                                  verticalAlign: "middle",
-                                  marginTop: 2,
-                                }}
-                                color={"#37B7C3"}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: 20,
-                                  color: "#37B7C3",
-                                }}
-                              >
-                                add to shelf
-                              </Text>
-                            </Pressable>
-                          </View>
-                        </View>
-                      ))
+                        )
+                      )
                     : null}
                 </View>
               </View>
