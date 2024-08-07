@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
@@ -14,6 +14,9 @@ import {
   ImageBackground,
   Image,
   Pressable,
+  Animated,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -23,6 +26,7 @@ import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../../assets/styles/style";
 import Settings from "../Settings";
+import GestureRecognizer from "react-native-swipe-gestures";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -56,12 +60,26 @@ export default function SwipeScreen({
   let { book, swipeSuggestions, currentIndex } = route.params;
   let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
   console.log(swipeSuggestions);
+  const pan = useRef(new Animated.ValueXY()).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: () => {
+        pan.extractOffset();
+      },
+    })
+  ).current;
   async function loadNextBook(feedback: string) {
     if (currentIndex === swipeSuggestions.length - 1) {
       setNextSwipeLoading(1);
       swipeSuggestions[currentIndex].title = book.title;
       swipeSuggestions[currentIndex].feedback = feedback;
-      swipeSuggestions[currentIndex] = JSON.stringify(swipeSuggestions[currentIndex]);
+      swipeSuggestions[currentIndex] = JSON.stringify(
+        swipeSuggestions[currentIndex]
+      );
       let uuid = await get("uuid");
       fetch(`http://localhost:3000/api/saveSwipes`, {
         method: "POST",
@@ -95,7 +113,9 @@ export default function SwipeScreen({
         .then((response) => response.json())
         .then((response) => {
           let book = response.docs[0];
-          let category = Object.keys(book).includes("subject") ? book.subject : [];
+          let category = Object.keys(book).includes("subject")
+            ? book.subject
+            : [];
           category = category.slice(0, 3);
           var bookInfo: Book = {
             title: book.title,
@@ -113,7 +133,9 @@ export default function SwipeScreen({
           swipeSuggestions[currentIndex].title = book.title;
           swipeSuggestions[currentIndex].feedback = feedback;
           //stringify current index
-          swipeSuggestions[currentIndex] = JSON.stringify(swipeSuggestions[currentIndex]);
+          swipeSuggestions[currentIndex] = JSON.stringify(
+            swipeSuggestions[currentIndex]
+          );
           setNextSwipeLoading(0);
           navigation.navigate("SwipeScreen", {
             book: bookInfo,
@@ -129,7 +151,9 @@ export default function SwipeScreen({
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
+      
       <SafeAreaView style={styles.container}>
+      <GestureRecognizer onSwipeLeft={() => console.log('left')}>
         <Text
           style={{
             fontSize: 32,
@@ -174,17 +198,44 @@ export default function SwipeScreen({
               alignItems: "center",
             }}
           >
-            <Text style={{
-              fontSize: 34,
-              fontWeight: "bold",
-              textAlign: 'center'
-            }}>Today's swipes are done!</Text>
+            <Text
+              style={{
+                fontSize: 34,
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              Today's swipes are done!
+            </Text>
             <Text>Check back tomorrow for more.</Text>
           </View>
         ) : (
           <>
-            <ScrollView
+            <Animated.View
               style={{
+                transform: [
+                  {
+                    translateX: pan.x.interpolate({
+                      inputRange: [-200, 0, 200],
+                      outputRange: [-200, 0, 200],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                  {
+                    translateY: pan.x.interpolate({
+                      inputRange: [-200, 0, 200],
+                      outputRange: [-70, 0, -70],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                  {
+                    rotate: pan.x.interpolate({
+                      inputRange: [-200, 0, 200],
+                      outputRange: ["-15deg", "0deg", "15deg"],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
                 height: "80%",
                 width: "90%",
                 margin: "auto",
@@ -193,42 +244,55 @@ export default function SwipeScreen({
                 borderWidth: 2,
                 borderRadius: 25,
                 marginBottom: 10,
+                opacity: pan.x.interpolate({
+                  inputRange: [-200, 0, 200],
+                  outputRange: [0.5, 1, 0.5],
+                  extrapolate: "clamp",
+                }),
               }}
+              {...panResponder.panHandlers}
             >
-              <Text style={styles.title}>{book.title}</Text>
-              {book.etag !== "" ? (
-                <Image
-                  source={{
-                    uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
-                  }}
-                  style={{
-                    width: "auto",
-                    height: 200,
-                    resizeMode: "contain",
-                    margin: 10,
-                    marginLeft: 0,
-                    marginRight: 0,
-                  }}
-                />
-              ) : null}
-              <View
+              <ScrollView
                 style={{
-                  margin: 20,
-                  marginTop: 0,
-                  flexDirection: "column",
-                  gap: 20,
+                  height: "100%",
+                  width: "100%",
                 }}
               >
-                <Text style={{ fontSize: 20 }}>{book.authors}</Text>
-                <Text style={{ fontSize: 20 }}>{book.category}</Text>
-                <Text style={{ fontSize: 20 }}>{book.description}</Text>
-              </View>
-            </ScrollView>
+                <Text style={styles.title}>{book.title}</Text>
+                {book.etag !== "" ? (
+                  <Image
+                    source={{
+                      uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
+                    }}
+                    style={{
+                      width: "auto",
+                      height: 200,
+                      resizeMode: "contain",
+                      margin: 10,
+                      marginLeft: 0,
+                      marginRight: 0,
+                    }}
+                  />
+                ) : null}
+                <View
+                  style={{
+                    margin: 20,
+                    marginTop: 0,
+                    flexDirection: "column",
+                    gap: 20,
+                  }}
+                >
+                  <Text style={{ fontSize: 20 }}>{book.authors}</Text>
+                  <Text style={{ fontSize: 20 }}>{book.category}</Text>
+                  <Text style={{ fontSize: 20 }}>{book.description}</Text>
+                </View>
+              </ScrollView>
+            </Animated.View>
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
-                width: "80%",
+                width: "90%",
               }}
             >
               <Pressable
@@ -246,12 +310,12 @@ export default function SwipeScreen({
                 <Icon
                   name="x-circle-fill"
                   type="octicon"
-                  size={32}
+                  size={34}
                   style={{
                     verticalAlign: "middle",
                     margin: 5,
                   }}
-                  color={"grey"}
+                  color={"black"}
                 />
               </Pressable>
 
@@ -268,14 +332,14 @@ export default function SwipeScreen({
                 }}
               >
                 <Icon
-                  name="feed-repo"
+                  name="no-entry"
                   type="octicon"
-                  size={32}
+                  size={34}
                   style={{
                     verticalAlign: "middle",
                     margin: 5,
                   }}
-                  color={"black"}
+                  color={"grey"}
                 />
               </Pressable>
               <Pressable
@@ -293,7 +357,7 @@ export default function SwipeScreen({
                 <Icon
                   name="feed-heart"
                   type="octicon"
-                  size={32}
+                  size={34}
                   style={{
                     verticalAlign: "middle",
                     margin: 5,
@@ -304,6 +368,7 @@ export default function SwipeScreen({
             </View>
           </>
         )}
+        </GestureRecognizer>
       </SafeAreaView>
     </ImageBackground>
   );
