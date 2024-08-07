@@ -59,7 +59,7 @@ export default function SwipeScreen({
 }) {
   let { book, swipeSuggestions, currentIndex } = route.params;
   let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
-  console.log(swipeSuggestions);
+  console.log(book, swipeSuggestions, currentIndex);
   const pan = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
     PanResponder.create({
@@ -67,8 +67,22 @@ export default function SwipeScreen({
       onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
         useNativeDriver: false,
       }),
-      onPanResponderRelease: () => {
-        pan.extractOffset();
+      onPanResponderRelease: (a, b) => {
+        Animated.spring(
+          pan, // Auto-multiplexed
+          { toValue: { x: 0, y: 0 }, useNativeDriver: true } // Back to zero
+        ).start();
+        if (b.dx > 80) {
+          console.log("Swipe right");
+          setTimeout(() => {
+            loadNextBook("like");
+          }, 500);
+        } else if (b.dx < -80) {
+          console.log("Swipe left");
+          setTimeout(() => {
+            loadNextBook("dislike");
+          }, 500);
+        }
       },
     })
   ).current;
@@ -151,224 +165,223 @@ export default function SwipeScreen({
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      
       <SafeAreaView style={styles.container}>
-      <GestureRecognizer onSwipeLeft={() => console.log('left')}>
-        <Text
-          style={{
-            fontSize: 32,
-            color: "black",
-            fontWeight: "bold",
-            marginBottom: 10,
-          }}
-        >
-          swipe
-        </Text>
-        {nextSwipeLoading === 1 ? (
-          <View
+        <>
+          <Text
             style={{
-              height: "75%",
-              width: "90%",
-              margin: "auto",
-              backgroundColor: "#f8f8f8",
-              borderColor: "white",
-              borderWidth: 2,
-              borderRadius: 20,
+              fontSize: 32,
+              color: "black",
+              fontWeight: "bold",
               marginBottom: 10,
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
             }}
           >
-            <Text style={styles.title}>Loading...</Text>
-          </View>
-        ) : nextSwipeLoading === 2 ? (
-          <View
-            style={{
-              height: "75%",
-              width: "90%",
-              margin: "auto",
-              backgroundColor: "#f8f8f8",
-              borderColor: "white",
-              borderWidth: 2,
-              borderRadius: 20,
-              marginBottom: 10,
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
+            swipe
+          </Text>
+          {nextSwipeLoading === 1 ? (
+            <View
               style={{
-                fontSize: 34,
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              Today's swipes are done!
-            </Text>
-            <Text>Check back tomorrow for more.</Text>
-          </View>
-        ) : (
-          <>
-            <Animated.View
-              style={{
-                transform: [
-                  {
-                    translateX: pan.x.interpolate({
-                      inputRange: [-200, 0, 200],
-                      outputRange: [-200, 0, 200],
-                      extrapolate: "clamp",
-                    }),
-                  },
-                  {
-                    translateY: pan.x.interpolate({
-                      inputRange: [-200, 0, 200],
-                      outputRange: [-70, 0, -70],
-                      extrapolate: "clamp",
-                    }),
-                  },
-                  {
-                    rotate: pan.x.interpolate({
-                      inputRange: [-200, 0, 200],
-                      outputRange: ["-15deg", "0deg", "15deg"],
-                      extrapolate: "clamp",
-                    }),
-                  },
-                ],
-                height: "80%",
+                height: "75%",
                 width: "90%",
                 margin: "auto",
                 backgroundColor: "#f8f8f8",
                 borderColor: "white",
                 borderWidth: 2,
-                borderRadius: 25,
+                borderRadius: 20,
                 marginBottom: 10,
-                opacity: pan.x.interpolate({
-                  inputRange: [-200, 0, 200],
-                  outputRange: [0.5, 1, 0.5],
-                  extrapolate: "clamp",
-                }),
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
               }}
-              {...panResponder.panHandlers}
             >
-              <ScrollView
-                style={{
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                <Text style={styles.title}>{book.title}</Text>
-                {book.etag !== "" ? (
-                  <Image
-                    source={{
-                      uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
-                    }}
-                    style={{
-                      width: "auto",
-                      height: 200,
-                      resizeMode: "contain",
-                      margin: 10,
-                      marginLeft: 0,
-                      marginRight: 0,
-                    }}
-                  />
-                ) : null}
-                <View
-                  style={{
-                    margin: 20,
-                    marginTop: 0,
-                    flexDirection: "column",
-                    gap: 20,
-                  }}
-                >
-                  <Text style={{ fontSize: 20 }}>{book.authors}</Text>
-                  <Text style={{ fontSize: 20 }}>{book.category}</Text>
-                  <Text style={{ fontSize: 20 }}>{book.description}</Text>
-                </View>
-              </ScrollView>
-            </Animated.View>
+              <Text style={styles.title}>Loading...</Text>
+            </View>
+          ) : nextSwipeLoading === 2 ? (
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
+                height: "75%",
                 width: "90%",
+                margin: "auto",
+                backgroundColor: "#f8f8f8",
+                borderColor: "white",
+                borderWidth: 2,
+                borderRadius: 20,
+                marginBottom: 10,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <Pressable
+              <Text
                 style={{
-                  borderRadius: 50,
-                  backgroundColor: "#f8f8f8",
-                  borderColor: "white",
-                  borderWidth: 1,
-                  padding: 5,
-                }}
-                onPress={() => {
-                  loadNextBook("dislike");
+                  fontSize: 34,
+                  fontWeight: "bold",
+                  textAlign: "center",
                 }}
               >
-                <Icon
-                  name="x-circle-fill"
-                  type="octicon"
-                  size={34}
-                  style={{
-                    verticalAlign: "middle",
-                    margin: 5,
-                  }}
-                  color={"black"}
-                />
-              </Pressable>
-
-              <Pressable
+                Today's swipes are done!
+              </Text>
+              <Text>Check back tomorrow for more.</Text>
+            </View>
+          ) : (
+            <>
+              <Animated.View
                 style={{
-                  borderRadius: 50,
-                  backgroundColor: "#f8f8f8",
-                  borderColor: "white",
-                  borderWidth: 1,
-                  padding: 5,
-                }}
-                onPress={() => {
-                  loadNextBook("neutral");
-                }}
-              >
-                <Icon
-                  name="no-entry"
-                  type="octicon"
-                  size={34}
-                  style={{
-                    verticalAlign: "middle",
-                    margin: 5,
-                  }}
-                  color={"grey"}
-                />
-              </Pressable>
-              <Pressable
-                style={{
-                  borderRadius: 50,
+                  transform: [
+                    {
+                      translateX: pan.x.interpolate({
+                        inputRange: [-200, 0, 200],
+                        outputRange: [-200, 0, 200],
+                        extrapolate: "clamp",
+                      }),
+                    },
+                    {
+                      translateY: pan.x.interpolate({
+                        inputRange: [-200, 0, 200],
+                        outputRange: [-70, 0, -70],
+                        extrapolate: "clamp",
+                      }),
+                    },
+                    {
+                      rotate: pan.x.interpolate({
+                        inputRange: [-200, 0, 200],
+                        outputRange: ["-15deg", "0deg", "15deg"],
+                        extrapolate: "clamp",
+                      }),
+                    },
+                  ],
+                  height: "80%",
+                  width: "90%",
+                  margin: "auto",
                   backgroundColor: "#f8f8f8",
                   borderColor: "white",
                   borderWidth: 2,
-                  padding: 5,
+                  borderRadius: 25,
+                  marginBottom: 10,
+                  opacity: pan.x.interpolate({
+                    inputRange: [-200, 0, 200],
+                    outputRange: [0.5, 1, 0.5],
+                    extrapolate: "clamp",
+                  }),
                 }}
-                onPress={() => {
-                  loadNextBook("like");
+                {...panResponder.panHandlers}
+              >
+                <ScrollView
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <Text style={styles.title}>{book.title}</Text>
+                  {book.etag !== "" ? (
+                    <Image
+                      source={{
+                        uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
+                      }}
+                      style={{
+                        width: "auto",
+                        height: 200,
+                        resizeMode: "contain",
+                        margin: 10,
+                        marginLeft: 0,
+                        marginRight: 0,
+                      }}
+                    />
+                  ) : null}
+                  <View
+                    style={{
+                      margin: 20,
+                      marginTop: 0,
+                      flexDirection: "column",
+                      gap: 20,
+                    }}
+                  >
+                    <Text style={{ fontSize: 20 }}>{book.authors}</Text>
+                    <Text style={{ fontSize: 20 }}>{book.category}</Text>
+                    <Text style={{ fontSize: 20 }}>{book.description}</Text>
+                  </View>
+                </ScrollView>
+              </Animated.View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "90%",
                 }}
               >
-                <Icon
-                  name="feed-heart"
-                  type="octicon"
-                  size={34}
+                <Pressable
                   style={{
-                    verticalAlign: "middle",
-                    margin: 5,
+                    borderRadius: 50,
+                    backgroundColor: "#f8f8f8",
+                    borderColor: "white",
+                    borderWidth: 1,
+                    padding: 5,
                   }}
-                  color={"red"}
-                />
-              </Pressable>
-            </View>
-          </>
-        )}
-        </GestureRecognizer>
+                  onPress={() => {
+                    loadNextBook("dislike");
+                  }}
+                >
+                  <Icon
+                    name="x-circle-fill"
+                    type="octicon"
+                    size={34}
+                    style={{
+                      verticalAlign: "middle",
+                      margin: 5,
+                    }}
+                    color={"black"}
+                  />
+                </Pressable>
+
+                <Pressable
+                  style={{
+                    borderRadius: 50,
+                    backgroundColor: "#f8f8f8",
+                    borderColor: "white",
+                    borderWidth: 1,
+                    padding: 5,
+                  }}
+                  onPress={() => {
+                    loadNextBook("neutral");
+                  }}
+                >
+                  <Icon
+                    name="no-entry"
+                    type="octicon"
+                    size={34}
+                    style={{
+                      verticalAlign: "middle",
+                      margin: 5,
+                    }}
+                    color={"grey"}
+                  />
+                </Pressable>
+                <Pressable
+                  style={{
+                    borderRadius: 50,
+                    backgroundColor: "#f8f8f8",
+                    borderColor: "white",
+                    borderWidth: 2,
+                    padding: 5,
+                  }}
+                  onPress={() => {
+                    loadNextBook("like");
+                  }}
+                >
+                  <Icon
+                    name="feed-heart"
+                    type="octicon"
+                    size={34}
+                    style={{
+                      verticalAlign: "middle",
+                      margin: 5,
+                    }}
+                    color={"red"}
+                  />
+                </Pressable>
+              </View>
+            </>
+          )}
+        </>
       </SafeAreaView>
     </ImageBackground>
   );

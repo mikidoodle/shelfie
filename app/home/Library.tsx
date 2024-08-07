@@ -20,6 +20,7 @@ let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -103,7 +104,7 @@ export default function Library() {
               flexDirection: "row",
               justifyContent: "space-between",
             }}>
-            <Text style={styles.title}>library</Text>
+            <Text style={styles.title}>shelf</Text>
             <Pressable onPress={searchBooks}>
             <Icon name="sync" type="octicon" size={26} style={styles.titleIcon} color={"black"} />
             </Pressable>
@@ -125,18 +126,15 @@ export default function Library() {
                       key={index}
                     >
                       {book.etag !== "" ? (
-                        <Image
-                          source={{
-                            uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
-                          }}
+                        <ResponsiveImage
+                          url={`https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`}
                           style={{
                             width: 325,
                             height: 150,
                             borderTopLeftRadius: 9,
                             borderTopRightRadius: 9,
-                            resizeMode: "cover",
                           }}
-                        />
+                          />
                       ) : (
                         <Text>No image available</Text>
                       )}

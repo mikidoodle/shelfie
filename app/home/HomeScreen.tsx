@@ -22,6 +22,7 @@ import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import GestureRecognizer from "react-native-swipe-gestures";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -391,19 +392,15 @@ export default function HomeScreen() {
                             key={index}
                           >
                             {book.etag !== "" ? (
-                              <Image
-                                source={{
-                                  uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
-                                }}
+                              <ResponsiveImage
+                                url={`https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`}
                                 style={{
                                   width: "100%",
-                                  margin: "auto",
                                   height: 150,
+                                  margin: 'auto',
                                   borderTopLeftRadius: 9,
                                   borderTopRightRadius: 9,
-                                  resizeMode: "cover",
-                                }}
-                              />
+                                }} />
                             ) : null}
                             <View
                               style={{

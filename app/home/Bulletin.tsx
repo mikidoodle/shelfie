@@ -170,7 +170,7 @@ export default function Bulletin() {
           };
           reviewResults.push(reviewData);
         });
-        setSearchResults(reviewResults);
+        setSearchResults(reviewResults.reverse());
       });
   }
 
