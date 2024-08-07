@@ -21,7 +21,7 @@ import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import ResponsiveImage from "@/components/ResponsiveImage";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -34,6 +34,10 @@ async function get(key: string) {
     return null;
   }
 }
+
+
+
+
 //create a type for the book
 type Book = {
   title: string;

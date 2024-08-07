@@ -4,7 +4,7 @@ import styles from "../assets/styles/style";
 import { Icon } from "@rneui/themed";
 import * as SecureStore from "expo-secure-store";
 import ResponsiveImage from "./ResponsiveImage";
-
+import * as LibraryStore from "./LibraryStore";
 async function get(key: string) {
   let result = await SecureStore.getItemAsync(key);
   if (result) {
@@ -30,50 +30,54 @@ type PropItem = {
   key: number;
   uuid: string;
 };
-
+type Book = {
+  title: string;
+  authors: string;
+  description: string;
+  etag: string;
+  category: string[];
+};
 export default function ReviewItem(props: PropItem) {
   let { review, uuid } = props;
   let [hasLiked, setHasLiked] = useState(review.liked.includes(uuid));
   let [likeCount, setLikeCount] = useState(review.liked.length);
   let [bookmarked, setBookmarked] = useState(false);
+  LibraryStore.getBook(review.meta.etag).then((data) => {
+    setBookmarked(data !== null);
+  });
   async function remotelyAddToLibrary() {
     let uuid = await get("uuid");
     setBookmarked(true);
+    await LibraryStore.storeBook(review.meta.etag, {
+      title: review.meta.title,
+    });
     fetch(
       `https://openlibrary.org/search.json?title=${encodeURIComponent(
         review.meta.title
       )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&language=eng`
     )
       .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
         if (response.docs.length > 0) {
           let book = response.docs[0];
-          fetch("http://localhost:3000/api/addBook", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              uuid: uuid,
-              title: book.title,
-              authors: book.author_name,
-              description: book.first_sentence,
-              etag: book.cover_edition_key,
-              category: book.subject,
-            }),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.error !== true) {
-                console.log("Book added to library");
-              } else {
-                Alert.alert("Error", "Could not add book to library");
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              Alert.alert("Error", "Could not add book to library");
-            });
+          var bookInfo: Book = {
+            title: book.title,
+            authors: Object.keys(book).includes("author_name")
+              ? book.author_name[0]
+              : "",
+            description: Object.keys(book).includes("first_sentence")
+              ? book.first_sentence[0]
+              : "No description available",
+            etag: review.meta.etag,
+            category: book.subject || [],
+          };
+          await LibraryStore.storeBook(review.meta.etag, {
+            title: book.title,
+            authors: book.authors,
+            description: book.description,
+            etag: book.cover_edition_key,
+            category: book.category,
+          });
         } else {
           Alert.alert("Error", "Could not find book");
         }
@@ -206,9 +210,7 @@ export default function ReviewItem(props: PropItem) {
               color={hasLiked ? "red" : "black"}
             />
           </Pressable>
-          <Pressable
-            onPress={remotelyAddToLibrary}
-          >
+          <Pressable onPress={remotelyAddToLibrary}>
             <Icon
               name={`bookmark${bookmarked ? "-slash" : ""}`}
               type="octicon"
@@ -216,7 +218,6 @@ export default function ReviewItem(props: PropItem) {
               color={bookmarked ? "grey" : "black"}
             />
           </Pressable>
-          
         </View>
       </View>
     </View>

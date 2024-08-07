@@ -23,7 +23,7 @@ import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import GestureRecognizer from "react-native-swipe-gestures";
 import ResponsiveImage from "@/components/ResponsiveImage";
-
+import * as LibraryStore from "../../components/LibraryStore"
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -216,6 +216,7 @@ export default function HomeScreen() {
   };
   async function addISBN(book: Book) {
     let uuidC = await get("uuid");
+    await LibraryStore.storeBook(book.etag, book)
     console.log(uuidC);
     fetch("http://localhost:3000/api/addISBN", {
       method: "POST",
