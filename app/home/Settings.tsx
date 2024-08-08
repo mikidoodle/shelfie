@@ -20,7 +20,7 @@ let gradient = require("../../assets/images/homeScreen.png");
 import * as SecureStore from "expo-secure-store";
 import { Divider, Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
-import * as LibraryStore from "../../components/LibraryStore"
+import * as LibraryStore from "../../components/LibraryStore";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -49,22 +49,27 @@ type Book = {
   category: string[];
 };
 export default function Settings() {
-  let [openAIKey, setOpenAIKey] = useState<string>("")
+  let [openAIKey, setOpenAIKey] = useState<string>("");
+  let [preExistingKey, setPreExistingKey] = useState<string>("");
   let [hasOpenAIKey, setHasOpenAIKey] = useState<boolean>(false);
-  useEffect(()=>{
-    get('openAIKey').then((data)=>{
-      setHasOpenAIKey(data !== null)
-    })
-  })
+  useEffect(() => {
+    get("openAIKey").then((data) => {
+      setHasOpenAIKey(data !== null);
+      setPreExistingKey(data === null ? "" : data);
+    });
+  });
   function storeOpenAIKey() {
-    save('openAIKey', openAIKey).then(()=>{
-      Alert.alert('OpenAI API key saved!')
-    })
+    save("openAIKey", openAIKey).then(() => {
+      setHasOpenAIKey(true);
+      Alert.alert("OpenAI API key saved!");
+    });
   }
   function deleteOpenAIKey() {
-    deleteSecret('openAIKey').then(()=>{
-      Alert.alert('OpenAI API key deleted!')
-    })
+    deleteSecret("openAIKey").then(() => {
+      setHasOpenAIKey(false);
+      Alert.alert("OpenAI API key deleted!");
+      setOpenAIKey("");
+    });
   }
   return (
     <ImageBackground
@@ -72,6 +77,7 @@ export default function Settings() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <ScrollView>
           <Text style={styles.title}>settings</Text>
@@ -79,10 +85,13 @@ export default function Settings() {
             style={{
               flexDirection: "column",
               gap: 10,
-              marginTop: 50,
+              marginTop: 30,
             }}
           >
-            <Pressable style={styles.settingsItemLeading} onPress={LibraryStore.clearLibrary}>
+            <Pressable
+              style={styles.settingsItemLeading}
+              onPress={LibraryStore.clearLibrary}
+            >
               <Text
                 style={{
                   color: "black",
@@ -106,7 +115,7 @@ export default function Settings() {
             <View
               style={{
                 flexDirection: "row",
-                gap: 5
+                gap: 5,
               }}
             >
               <View
@@ -124,27 +133,55 @@ export default function Settings() {
                   style={{
                     color: "black",
                     fontSize: 20,
+                    padding: 5
                   }}
-                  secureTextEntry={true}
                   value={openAIKey}
-                  placeholder="enter OpenAI key"
+                  onChangeText={(t) => {
+                    setOpenAIKey(t);
+                  }}
+                  placeholder={hasOpenAIKey ? preExistingKey : "enter OpenAI key"}
+                  onSubmitEditing={storeOpenAIKey}
                 />
               </View>
-              <Pressable style={{
-                borderRadius: 5,
-                backgroundColor: "black",
-                borderColor: "black",
-                borderWidth: 2,
-                width: 60,
-                alignItems: 'center',
-              }}>
-                <Text style={{
-                  fontSize: 18,
-                  color: 'white',
-                  marginTop: 5
-                }}>Store</Text>
+              <Pressable
+                style={{
+                  borderRadius: 5,
+                  backgroundColor: "black",
+                  borderColor: "black",
+                  borderWidth: 2,
+                  width: 60,
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  storeOpenAIKey();
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "white",
+                    marginTop: 10,
+                  }}
+                >
+                  Store
+                </Text>
               </Pressable>
             </View>
+            <Pressable
+              style={styles.settingsItemMiddle}
+              onPress={deleteOpenAIKey}
+              disabled={!hasOpenAIKey}
+              
+            >
+              <Text
+                style={{
+                  color: hasOpenAIKey ? "black" : "grey",
+                  fontSize: 20,
+                }}
+              >
+                Reset OpenAI key
+              </Text>
+            </Pressable>
             <Pressable
               onPress={() => {
                 deleteSecret("uuid");
@@ -171,6 +208,7 @@ export default function Settings() {
           </View>
         </ScrollView>
       </SafeAreaView>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }

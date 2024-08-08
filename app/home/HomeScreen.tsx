@@ -348,6 +348,14 @@ export default function HomeScreen() {
                     placeholder="Type in a book name!"
                     onChangeText={(text) => setSearchQuery(text)}
                     value={searchQuery}
+                    onSubmitEditing={
+                      isSearching
+                        ? () => {}
+                        : () => {
+                            setSearchResults([]);
+                            searchBooks(searchQuery);
+                          }
+                    }
                   />
                   <Pressable
                     style={{
@@ -475,7 +483,7 @@ export default function HomeScreen() {
                                   backgroundColor: "#37B7C3",
                                 }}
                               />
-                                <AddToShelf book={book}/>
+                              <AddToShelf book={book} />
                             </View>
                           </View>
                         ) : (

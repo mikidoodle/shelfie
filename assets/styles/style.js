@@ -17,7 +17,7 @@ export default styles = StyleSheet.create({
   settingsItemLeading: {
     width: 325,
     margin: "auto",
-    padding: 5,
+    padding: 10,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     borderBottomLeftRadius: 5,
@@ -29,7 +29,7 @@ export default styles = StyleSheet.create({
   settingsItemMiddle: {
     width: 325,
     margin: "auto",
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
     backgroundColor: "white",
     borderColor: "white",
@@ -38,7 +38,7 @@ export default styles = StyleSheet.create({
   settingsItemTrailing: {
     width: 325,
     margin: "auto",
-    padding: 5,
+    padding: 10,
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
     borderBottomLeftRadius: 16,

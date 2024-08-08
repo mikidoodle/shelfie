@@ -21,6 +21,7 @@ import * as SecureStore from "expo-secure-store";
 import { Divider, Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import ReviewItem from "../../components/ReviewItem"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -53,6 +54,7 @@ export default function Bulletin() {
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
   let [userUUID, setUserUUID] = useState<any>();
   let [searchResults, setSearchResults] = useState<Review[]>([]);
+    
   useEffect(() => {
     searchBooks();
   }, []);

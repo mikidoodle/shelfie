@@ -3,7 +3,21 @@ import { Alert } from "react-native";
 
 export async function storeBook(etag: string, book: object) {
   try {
-    await AsyncStorage.setItem(`@shelfie:${etag}`, JSON.stringify(book));
+    let bookList = await AsyncStorage.getItem(`@shelfie:booklist`);
+    let parsedBookList = bookList ? bookList.split(",") : [];
+    if (parsedBookList.includes(etag)) {
+      await AsyncStorage.removeItem(`@shelfie:${etag}`);
+      //remove etag from booklist
+      const index = parsedBookList.indexOf(etag);
+      if (index > -1) {
+        parsedBookList.splice(index, 1);
+      }
+      await AsyncStorage.setItem(`@shelfie:booklist`, parsedBookList.join(","));
+    } else {
+      await AsyncStorage.setItem(`@shelfie:${etag}`, JSON.stringify(book));
+      parsedBookList.push(etag);
+      await AsyncStorage.setItem(`@shelfie:booklist`, parsedBookList.join(","));
+    }
   } catch (error) {
     Alert.alert("Error saving book to library.");
   }
@@ -14,14 +28,35 @@ export async function getBook(etag: string) {
     const value = await AsyncStorage.getItem(`@shelfie:${etag}`);
     return value;
   } catch (e) {
-    Alert.alert("Error reading library")
+    Alert.alert("Error reading library");
   }
 }
 
+export async function clearLibrary() {
+  try {
+    let bookList = await AsyncStorage.getItem(`@shelfie:booklist`);
+    let parsedBookList = bookList ? bookList.split(",") : [];
+    for(var i=0;i<parsedBookList.length;i++) {
+      parsedBookList[i] = `@shelfie:${parsedBookList[i]}`
+    }
+    await AsyncStorage.multiRemove(parsedBookList);
+    await AsyncStorage.setItem(`@shelfie:booklist`, '')
+    Alert.alert("Library cleared!")
+  } catch (e) {
+    Alert.alert("Error clearing library");
+  }
+}
 export async function deleteBook(etag: string) {
   try {
-    await AsyncStorage.removeItem(`@shelfie:${etag}`)
-  } catch(e) {
-    Alert.alert("Error deleting from library.")
+    await AsyncStorage.removeItem(`@shelfie:${etag}`);
+    let bookList = await AsyncStorage.getItem(`@shelfie:booklist`);
+    let parsedBookList = bookList ? bookList.split(",") : [];
+    const index = parsedBookList.indexOf(etag);
+    if (index > -1) {
+      parsedBookList.splice(index, 1);
+    }
+    await AsyncStorage.setItem(`@shelfie:booklist`, parsedBookList.join(","));
+  } catch (e) {
+    Alert.alert("Error deleting from library.");
   }
- }
+}

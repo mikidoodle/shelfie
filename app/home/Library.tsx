@@ -201,7 +201,6 @@ export default function Library() {
                         }}
                         key={index}
                       >
-                        {book.etag !== "" ? (
                           <ResponsiveImage
                             url={`https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`}
                             style={{
@@ -211,9 +210,6 @@ export default function Library() {
                               borderTopRightRadius: 9,
                             }}
                           />
-                        ) : (
-                          <Text>No image available</Text>
-                        )}
                         <View
                           style={{
                             padding: 10,
