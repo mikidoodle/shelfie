@@ -21,8 +21,8 @@ import Library from "./Library";
 import Settings from "./Settings";
 import styles from "../../assets/styles/style";
 import Bulletin from "./Bulletin";
-import Swipe from "./Swipe";
 import Swipes from "./Swipes";
+
 const Tab = createBottomTabNavigator();
 const ModalStack = createStackNavigator();
 export default function Home() {

@@ -104,7 +104,7 @@ export default function Bulletin() {
             content: review.reviewCount,
             meta: {
               title: "",
-              authors: review.libraryCount,
+              authors: "",
               etag: "shelfieuser",
             },
             username: review.username,
@@ -154,7 +154,6 @@ export default function Bulletin() {
           return;
         }
         let reviewResults: Review[] = [];
-        setMyISBNs(data.isbns);
         data.reviews.map((review: any) => {
           var reviewData: Review = {
             title: review.title,
@@ -372,33 +371,9 @@ export default function Bulletin() {
                                 style={{
                                   flexDirection: "column",
                                   gap: 5,
-                                  borderRightWidth: 2,
-                                  borderColor: "lightgrey",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  width: "50%"
-                                }}
-                              >
-                                <Text
-                                  style={{ fontWeight: "bold", fontSize: 24 }}
-                                >
-                                  {review.meta.authors}
-                                </Text>
-                                <Text>
-                                  book
-                                  {parseInt(review.meta.authors) > 1
-                                    ? "s"
-                                    : ""}{" "}
-                                  in library
-                                </Text>
-                              </View>
-                              <View
-                                style={{
-                                  flexDirection: "column",
-                                  gap: 5,
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "50%"
+                                  width: "100%"
                                 }}
                               >
                                 <Text

@@ -23,7 +23,8 @@ import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import GestureRecognizer from "react-native-swipe-gestures";
 import ResponsiveImage from "@/components/ResponsiveImage";
-import * as LibraryStore from "../../components/LibraryStore"
+import * as LibraryStore from "../../components/LibraryStore";
+import AddToShelf from "@/components/AddToShelf";
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
@@ -54,13 +55,12 @@ export default function HomeScreen() {
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
   let [modalContent, setModalContent] = useState<ReactElement>();
-  let [reviewTitle, setReviewTitle] = useState<string>('');
-  let [reviewContent, setReviewContent] = useState<string>('');
+  let [reviewTitle, setReviewTitle] = useState<string>("");
+  let [reviewContent, setReviewContent] = useState<string>("");
 
   let reviewTitleRef = useRef<any>(null);
   let reviewContentRef = useRef<any>(null);
   function searchBooks(query: string) {
-    
     if (query.length > 0) {
       console.log("search: accepted");
       setIsSearching(true);
@@ -129,7 +129,7 @@ export default function HomeScreen() {
         uuid: uuid,
         username: username,
       }),
-    })
+    });
     let data = await res.json();
     if (data.error) {
       Alert.alert(data.message);
@@ -215,10 +215,9 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
   async function addISBN(book: Book) {
-    let uuidC = await get("uuid");
-    await LibraryStore.storeBook(book.etag, book)
-    console.log(uuidC);
-    fetch("http://localhost:3000/api/addISBN", {
+    await LibraryStore.storeBook(book.etag, book);
+    Alert.alert("Book added to shelf!");
+    /* fetch("http://localhost:3000/api/addISBN", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -244,7 +243,7 @@ export default function HomeScreen() {
         } else {
           Alert.alert(data.message);
         }
-      });
+      });*/
   }
   return (
     <ImageBackground
@@ -398,10 +397,11 @@ export default function HomeScreen() {
                                 style={{
                                   width: "100%",
                                   height: 150,
-                                  margin: 'auto',
+                                  margin: "auto",
                                   borderTopLeftRadius: 9,
                                   borderTopRightRadius: 9,
-                                }} />
+                                }}
+                              />
                             ) : null}
                             <View
                               style={{
@@ -475,34 +475,7 @@ export default function HomeScreen() {
                                   backgroundColor: "#37B7C3",
                                 }}
                               />
-                              <Pressable
-                                style={{
-                                  flexDirection: "row",
-                                  justifyContent: "center",
-                                  gap: 5,
-                                  margin: 10,
-                                }}
-                                onPress={() => addISBN(book)}
-                              >
-                                <Icon
-                                  name="heart"
-                                  type="octicon"
-                                  size={20}
-                                  style={{
-                                    verticalAlign: "middle",
-                                    marginTop: 2,
-                                  }}
-                                  color={"#37B7C3"}
-                                />
-                                <Text
-                                  style={{
-                                    fontSize: 20,
-                                    color: "#37B7C3",
-                                  }}
-                                >
-                                  add to shelf
-                                </Text>
-                              </Pressable>
+                                <AddToShelf book={book}/>
                             </View>
                           </View>
                         ) : (
