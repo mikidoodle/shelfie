@@ -14,6 +14,7 @@ import { Link, router } from "expo-router";
 let gradient = require("../assets/images/homeScreen.png");
 import * as SecretStore from "@/components/SecretStore";
 import styles from "../assets/styles/style";
+import { APIEndpoint } from "@/components/Types";
 
 export default function Index() {
   let [changeUsername, onChangeUsername] = useState("");
@@ -30,7 +31,7 @@ export default function Index() {
   }, []);
   function Login() {
     setDisabled(true);
-    fetch("http://localhost:3000/api/login", {
+    fetch(`${APIEndpoint}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

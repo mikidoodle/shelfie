@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Icon } from "@rneui/themed";
 import * as SecureStore from "expo-secure-store";
 import ResponsiveImage from "./ResponsiveImage";
-import { Book, ReviewPropItem } from "./Types";
+import { APIEndpoint, Book, ReviewPropItem } from "./Types";
 import * as LibraryStore from "./LibraryStore";
 async function get(key: string) {
   let result = await SecureStore.getItemAsync(key);
@@ -69,7 +69,7 @@ export default function ReviewItem(props: ReviewPropItem) {
     review.liked.includes(uuid)
       ? review.liked.splice(review.liked.indexOf(uuid), 1)
       : review.liked.push(uuid);
-    fetch("http://localhost:3000/api/likeReview", {
+    fetch(`${APIEndpoint}/api/likeReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

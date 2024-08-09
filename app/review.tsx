@@ -10,7 +10,7 @@ import {
 import styles from "@/assets/styles/style";
 import { useEffect, useState } from "react";
 import * as SecretStore from "@/components/SecretStore";
-import { Book } from "@/components/Types";
+import { APIEndpoint, Book } from "@/components/Types";
 import { Link, router, useLocalSearchParams } from "expo-router";
 export default function ReviewModal() {
   const params = useLocalSearchParams();
@@ -21,7 +21,7 @@ export default function ReviewModal() {
   let [username, setUsername] = useState<string>("");
   let [uuid, setUUID] = useState<string>("");
   async function submitReview() {
-    var res = await fetch("http://localhost:3000/api/addReview", {
+    var res = await fetch(`${APIEndpoint}/api/addReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

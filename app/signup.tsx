@@ -14,6 +14,7 @@ import { Link, router } from "expo-router";
 let gradient = require("../assets/images/homeScreen.png");
 import * as SecretStore from "@/components/SecretStore";
 import styles from "../assets/styles/style";
+import { APIEndpoint } from "@/components/Types";
 export default function Index() {
 
   let [changeUsername, onChangeUsername] = useState("");
@@ -25,7 +26,7 @@ export default function Index() {
   function Signup() {
     if(/^[a-zA-Z0-9._]{1,16}$/.test(changeUsername)) {
     setDisabled(true);
-    fetch("http://localhost:3000/api/signup", {
+    fetch(`${APIEndpoint}/api/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

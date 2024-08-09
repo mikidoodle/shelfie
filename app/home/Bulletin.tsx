@@ -17,7 +17,7 @@ import {  Icon } from "@rneui/themed";
 import {Review} from "@/components/Types";
 import styles from "../../assets/styles/style";
 import ReviewItem from "../../components/ReviewItem";
-
+import { APIEndpoint } from "@/components/Types";
 export default function Bulletin() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [searchMode, setSearchMode] = useState<number>(1);
@@ -42,7 +42,7 @@ export default function Bulletin() {
       return;
     }
     setSearchResults([]);
-    fetch(`http://localhost:3000/api/getUsers`, {
+    fetch(`${APIEndpoint}/api/getUsers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export default function Bulletin() {
     let uuid = await SecretStore.get("uuid");
     setUserUUID(uuid);
     setSearchResults([]);
-    fetch(`http://localhost:3000/api/getReviews`, {
+    fetch(`${APIEndpoint}/api/getReviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

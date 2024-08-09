@@ -29,3 +29,5 @@ export type ReviewPropItem = {
   key: number;
   uuid: string;
 };
+
+export const APIEndpoint: string = 'https://shelfie.pidgon.com'

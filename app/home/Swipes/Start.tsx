@@ -11,7 +11,7 @@ let gradient = require("../../../assets/images/homeScreen.png");
 import { Icon } from "@rneui/themed";
 import * as SecretStore from "@/components/SecretStore";
 import styles from "../../../assets/styles/style";
-import { Book } from "@/components/Types";
+import { APIEndpoint, Book } from "@/components/Types";
 const Stack = createNativeStackNavigator();
 
 export default function Start({
@@ -25,7 +25,7 @@ export default function Start({
   async function startSwiping() {
     setNextSwipeLoading(true);
     let uuid = await SecretStore.get("uuid");
-    fetch(`http://localhost:3000/api/getSwipes`, {
+    fetch(`${APIEndpoint}/api/getSwipes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
