@@ -40,7 +40,7 @@ export async function clearLibrary() {
       parsedBookList[i] = `@shelfie:${parsedBookList[i]}`
     }
     await AsyncStorage.multiRemove(parsedBookList);
-    await AsyncStorage.setItem(`@shelfie:booklist`, '')
+    await AsyncStorage.setItem(`@shelfie:booklist`, '[]')
     Alert.alert("Library cleared!")
   } catch (e) {
     Alert.alert("Error clearing library");

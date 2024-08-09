@@ -2,37 +2,20 @@ import { useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
   TextInput,
-  Button,
-  ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
   ImageBackground,
   Pressable,
 } from "react-native";
-import bcrypt from "bcrypt-react-native";
-import postgres from "postgres";
 import { Link, router } from "expo-router";
 let gradient = require("../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
+import * as SecretStore from "@/components/SecretStore";
 import styles from "../assets/styles/style";
 export default function Index() {
-  async function save(key: string, value: string) {
-    await SecureStore.setItemAsync(key, value);
-  }
 
-  async function get(key: string) {
-    let result = await SecureStore.getItemAsync(key);
-    if (result) {
-      return result;
-    } else {
-      return null;
-    }
-  }
   let [changeUsername, onChangeUsername] = useState("");
   let [changeEmail, onChangeEmail] = useState("");
 
@@ -59,8 +42,8 @@ export default function Index() {
         setDisabled(false);
         Alert.alert(data.message);
         if (data.error === false) {
-          await save("uuid", data.uuid);
-          await save("username", data.username);
+          await SecretStore.set("uuid", data.uuid);
+          await SecretStore.set("username", data.username);
           router.replace("/");
         }
       });

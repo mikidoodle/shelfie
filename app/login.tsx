@@ -2,12 +2,8 @@ import { useEffect, useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
   TextInput,
-  Button,
-  ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
@@ -16,20 +12,8 @@ import {
 } from "react-native";
 import { Link, router } from "expo-router";
 let gradient = require("../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
+import * as SecretStore from "@/components/SecretStore";
 import styles from "../assets/styles/style";
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
-
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
 
 export default function Index() {
   let [changeUsername, onChangeUsername] = useState("");
@@ -37,7 +21,7 @@ export default function Index() {
   let [isDisabled, setDisabled] = useState(false);
   useEffect(() => {
     (async () => {
-      let uuid = await get("uuid");
+      let uuid = await SecretStore.get("uuid");
       if (uuid) {
         router.replace("home");
         console.log(uuid);
@@ -63,8 +47,8 @@ export default function Index() {
           setDisabled(false);
           return;
         } else {
-          await save("uuid", data.uuid);
-          await save("username", data.username);
+          await SecretStore.set("uuid", data.uuid);
+          await SecretStore.set("username", data.username);
           setDisabled(false);
           router.replace("/");
         }

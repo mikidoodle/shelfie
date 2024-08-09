@@ -1,52 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
-  TextInput,
-  Button,
   ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Alert,
   ImageBackground,
   Image,
   Pressable,
   Animated,
   PanResponder,
-  Dimensions,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Link, router } from "expo-router";
 let gradient = require("../../../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
 import styles from "../../../assets/styles/style";
-import Settings from "../Settings";
-import GestureRecognizer from "react-native-swipe-gestures";
-
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
-
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
-type Book = {
-  title: string;
-  authors: string;
-  description: string;
-  etag: string;
-  category: string[];
-};
+import * as SecretStore from "@/components/SecretStore";
+import { Book } from "@/components/Types";
 
 const Stack = createNativeStackNavigator();
 
@@ -94,7 +63,7 @@ export default function SwipeScreen({
       swipeSuggestions[currentIndex] = JSON.stringify(
         swipeSuggestions[currentIndex]
       );
-      let uuid = await get("uuid");
+      let uuid = await SecretStore.get("uuid");
       fetch(`http://localhost:3000/api/saveSwipes`, {
         method: "POST",
         headers: {

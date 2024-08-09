@@ -1,49 +1,17 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
-  TextInput,
-  Button,
-  ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Alert,
   ImageBackground,
-  Image,
   Pressable,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Link, router } from "expo-router";
 let gradient = require("../../../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
 import { Icon } from "@rneui/themed";
+import * as SecretStore from "@/components/SecretStore";
 import styles from "../../../assets/styles/style";
-import SwipeScreen from "./SwipeScreen";
-
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
-
-type Book = {
-  title: string;
-  authors: string;
-  description: string;
-  etag: string;
-  category: string[];
-};
-
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
+import { Book } from "@/components/Types";
 const Stack = createNativeStackNavigator();
 
 export default function Start({
@@ -56,7 +24,7 @@ export default function Start({
   let [nextSwipeLoading, setNextSwipeLoading] = useState<boolean>(false);
   async function startSwiping() {
     setNextSwipeLoading(true);
-    let uuid = await get("uuid");
+    let uuid = await SecretStore.get("uuid");
     fetch(`http://localhost:3000/api/getSwipes`, {
       method: "POST",
       headers: {
@@ -68,46 +36,52 @@ export default function Start({
     })
       .then((response) => response.json())
       .then((response) => {
-          let swipeSuggestionsUF = JSON.parse(response.message);
-          let swipeSuggestions: any = [];
-              for (let i = 0; i < swipeSuggestionsUF.length; i++) {
-                swipeSuggestions.push({
-                  title: swipeSuggestionsUF[i],
-                  feedback: ""
-                });
-              }
-          console.log(`https://openlibrary.org/search.json?title=${encodeURIComponent(
-              swipeSuggestions[0].title
-            )}`)
-          fetch(
-            `https://openlibrary.org/search.json?title=${encodeURIComponent(
-              swipeSuggestions[0].title
-            )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
-          )
-            .then((response) => response.json())
-            .then((response) => {
-              setNextSwipeLoading(false);
-              let book = response.docs[0];
-              let category = Object.keys(book).includes("subject") ? book.subject : [];
-              category = category.slice(0, 3);
-              var bookInfo: Book = {
-                title: book.title,
-                authors: Object.keys(book).includes("author_name")
-                  ? book.author_name[0]
-                  : "",
-                description: Object.keys(book).includes("first_sentence")
-                  ? book.first_sentence[0]
-                  : "No description available",
-                etag: Object.keys(book).includes("cover_edition_key") ? book.cover_edition_key : "",
-                category: category.join(', '),
-              };
-              
-              navigation.navigate("SwipeScreen", {
-                book: bookInfo,
-                swipeSuggestions: swipeSuggestions,
-                currentIndex: 0,
-              });
+        let swipeSuggestionsUF = JSON.parse(response.message);
+        let swipeSuggestions: any = [];
+        for (let i = 0; i < swipeSuggestionsUF.length; i++) {
+          swipeSuggestions.push({
+            title: swipeSuggestionsUF[i],
+            feedback: "",
+          });
+        }
+        console.log(
+          `https://openlibrary.org/search.json?title=${encodeURIComponent(
+            swipeSuggestions[0].title
+          )}`
+        );
+        fetch(
+          `https://openlibrary.org/search.json?title=${encodeURIComponent(
+            swipeSuggestions[0].title
+          )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
+        )
+          .then((response) => response.json())
+          .then((response) => {
+            setNextSwipeLoading(false);
+            let book = response.docs[0];
+            let category = Object.keys(book).includes("subject")
+              ? book.subject
+              : [];
+            category = category.slice(0, 3);
+            var bookInfo: Book = {
+              title: book.title,
+              authors: Object.keys(book).includes("author_name")
+                ? book.author_name[0]
+                : "",
+              description: Object.keys(book).includes("first_sentence")
+                ? book.first_sentence[0]
+                : "No description available",
+              etag: Object.keys(book).includes("cover_edition_key")
+                ? book.cover_edition_key
+                : "",
+              category: category.join(", "),
+            };
+
+            navigation.navigate("SwipeScreen", {
+              book: bookInfo,
+              swipeSuggestions: swipeSuggestions,
+              currentIndex: 0,
             });
+          });
       });
   }
 
@@ -179,9 +153,7 @@ export default function Start({
               />
               swipe up to save a book
             </Text>
-            <Pressable
-              onPress={startSwiping}
-            >
+            <Pressable onPress={startSwiping}>
               <View
                 style={{
                   backgroundColor: "black",
@@ -198,7 +170,9 @@ export default function Start({
                     margin: "auto",
                   }}
                 >
-                  {nextSwipeLoading ? "loading today's swipes..." : "start swiping!"}
+                  {nextSwipeLoading
+                    ? "loading today's swipes..."
+                    : "start swiping!"}
                 </Text>
               </View>
             </Pressable>

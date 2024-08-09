@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { View, Text, Image, Pressable, Alert } from "react-native";
+import { Image, Pressable } from "react-native";
+import { ImagePropItem } from "./Types";
 
-type PropItem = {
-  url: string;
-  style: object;
-};
-export default function ResponsiveImage(props: PropItem) {
+export default function ResponsiveImage(props: ImagePropItem) {
   let [resizeMode, setResizeMode] = useState(false);
   return ( 
     <Pressable onPress={()=>{setResizeMode(!resizeMode)}}>

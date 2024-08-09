@@ -2,70 +2,42 @@ import { useEffect, useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
   TextInput,
-  Button,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
   ImageBackground,
-  Image,
   Pressable,
 } from "react-native";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
-import { Divider, Icon } from "@rneui/themed";
+import * as SecretStore from "@/components/SecretStore";
+import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import * as LibraryStore from "../../components/LibraryStore";
 
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-  return true;
-}
 
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
 
-async function deleteSecret(key: string) {
-  await SecureStore.deleteItemAsync(key);
-  return true;
-}
-//create a type for the book
-type Book = {
-  title: string;
-  authors: string;
-  description: string;
-  etag: string;
-  category: string[];
-};
 export default function Settings() {
   let [openAIKey, setOpenAIKey] = useState<string>("");
   let [preExistingKey, setPreExistingKey] = useState<string>("");
   let [hasOpenAIKey, setHasOpenAIKey] = useState<boolean>(false);
   useEffect(() => {
-    get("openAIKey").then((data) => {
+    SecretStore.get("openAIKey").then((data) => {
       setHasOpenAIKey(data !== null);
       setPreExistingKey(data === null ? "" : data);
     });
   });
   function storeOpenAIKey() {
-    save("openAIKey", openAIKey).then(() => {
+    SecretStore.set("openAIKey", openAIKey).then(() => {
       setHasOpenAIKey(true);
       Alert.alert("OpenAI API key saved!");
     });
   }
   function deleteOpenAIKey() {
-    deleteSecret("openAIKey").then(() => {
+    SecretStore.deleteSecret("openAIKey").then(() => {
       setHasOpenAIKey(false);
       Alert.alert("OpenAI API key deleted!");
       setOpenAIKey("");
@@ -184,7 +156,7 @@ export default function Settings() {
             </Pressable>
             <Pressable
               onPress={() => {
-                deleteSecret("uuid");
+                SecretStore.deleteSecret("uuid");
                 router.push("/");
               }}
               style={styles.settingsItemTrailing}

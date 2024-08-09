@@ -1,9 +1,9 @@
-import { View, Text, Image, Pressable, Alert } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import { useState } from "react";
-import styles from "../assets/styles/style";
 import { Icon } from "@rneui/themed";
 import * as SecureStore from "expo-secure-store";
 import ResponsiveImage from "./ResponsiveImage";
+import { Book, ReviewPropItem } from "./Types";
 import * as LibraryStore from "./LibraryStore";
 async function get(key: string) {
   let result = await SecureStore.getItemAsync(key);
@@ -13,31 +13,7 @@ async function get(key: string) {
     return null;
   }
 }
-type Review = {
-  title: string;
-  content: string;
-  meta: {
-    title: string;
-    authors: string;
-    etag: string;
-  };
-  username: string;
-  uuid: string;
-  liked: string[];
-};
-type PropItem = {
-  review: Review;
-  key: number;
-  uuid: string;
-};
-type Book = {
-  title: string;
-  authors: string;
-  description: string;
-  etag: string;
-  category: string[];
-};
-export default function ReviewItem(props: PropItem) {
+export default function ReviewItem(props: ReviewPropItem) {
   let { review, uuid } = props;
   let [hasLiked, setHasLiked] = useState(review.liked.includes(uuid));
   let [likeCount, setLikeCount] = useState(review.liked.length);

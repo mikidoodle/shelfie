@@ -2,50 +2,26 @@ import { ReactElement, useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
   TextInput,
-  Button,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
   ImageBackground,
-  Image,
   Pressable,
-  Modal,
 } from "react-native";
-import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
+import * as SecretStore from "@/components/SecretStore";
 import { Icon } from "@rneui/themed";
+import { Book } from "@/components/Types";
 import styles from "../../assets/styles/style";
 import GestureRecognizer from "react-native-swipe-gestures";
 import ResponsiveImage from "@/components/ResponsiveImage";
 import * as LibraryStore from "../../components/LibraryStore";
 import AddToShelf from "@/components/AddToShelf";
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
+import { router } from "expo-router";
 
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
-
-//create a type for the book
-type Book = {
-  title: string;
-  authors: string;
-  description: string;
-  etag: string;
-  category: string[];
-};
 
 export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
@@ -57,9 +33,6 @@ export default function HomeScreen() {
   let [modalContent, setModalContent] = useState<ReactElement>();
   let [reviewTitle, setReviewTitle] = useState<string>("");
   let [reviewContent, setReviewContent] = useState<string>("");
-
-  let reviewTitleRef = useRef<any>(null);
-  let reviewContentRef = useRef<any>(null);
   function searchBooks(query: string) {
     if (query.length > 0) {
       console.log("search: accepted");
@@ -109,8 +82,8 @@ export default function HomeScreen() {
 
   useEffect(() => {
     (async () => {
-      let uuidC = await get("uuid");
-      let usernameC = await get("username");
+      let uuidC = await SecretStore.get("uuid");
+      let usernameC = await SecretStore.get("username");
       setUsername(usernameC);
       setUUID(uuidC);
     })();
@@ -140,78 +113,9 @@ export default function HomeScreen() {
     }
   }
   const startReview = async (book: Book) => {
-    setModalContent(
-      <View>
-        {book.etag !== "" ? (
-          <Image
-            source={{
-              uri: `https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`,
-            }}
-            style={{
-              width: "100%",
-              height: 175,
-              borderTopLeftRadius: 9,
-              borderTopRightRadius: 9,
-              resizeMode: "cover",
-            }}
-          />
-        ) : null}
-        <View
-          style={{
-            padding: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              gap: 5,
-              width: "80%",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-              }}
-            >
-              {book.title}
-            </Text>
-            <Pressable
-              style={{
-                backgroundColor: "black",
-                padding: 10,
-                borderRadius: 9,
-              }}
-              onPress={async () => {
-                setModalVisible(false);
-                setModalVisible(true);
-                await submitReview(book);
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 20,
-                  verticalAlign: "middle",
-                }}
-              >
-                Post Review!
-              </Text>
-            </Pressable>
-          </View>
-          <Text
-            style={{
-              paddingBottom: 5,
-              paddingTop: 5,
-              color: "grey",
-            }}
-          >
-            {username}'s review
-          </Text>
-        </View>
-      </View>
-    );
+   /* setModalContent(
+      modal content was here
+    );*/
     setModalVisible(true);
   };
   async function addISBN(book: Book) {
@@ -262,66 +166,7 @@ export default function HomeScreen() {
             flex: 1,
           }}
         >
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              setModalVisible(!modalVisible);
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-                borderTopRightRadius: 25,
-                borderTopLeftRadius: 25,
-              }}
-            >
-              <View
-                style={{
-                  top: 0,
-                  height: "90%",
-                  width: "100%",
-                  padding: 0,
-                  borderTopRightRadius: 25,
-                  borderTopLeftRadius: 25,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                {modalContent}
-                <ScrollView style={{ height: "100%" }}>
-                  <TextInput
-                    style={styles.reviewTitleInput}
-                    placeholder="Title"
-                    onChangeText={(text) => {
-                      setReviewTitle(text);
-                      console.log(reviewTitle);
-                    }}
-                    defaultValue={reviewTitle}
-                    keyboardType="default"
-                    autoCapitalize="none"
-                  />
-                  <Text>{reviewTitle}</Text>
-                  <TextInput
-                    style={styles.reviewContentInput}
-                    placeholder="Write your review here!"
-                    onChangeText={(text) => {
-                      setReviewContent(text);
-                      console.log(reviewContent);
-                    }}
-                    defaultValue={reviewContent}
-                    keyboardType="default"
-                    autoCapitalize="none"
-                    multiline={true}
-                    numberOfLines={4}
-                  />
-                  <Text>{reviewContent}</Text>
-                </ScrollView>
-              </View>
-            </View>
-          </Modal>
+          {/*modal was here*/}
           <ScrollView>
             <SafeAreaView style={styles.container}>
               <View>
@@ -455,7 +300,10 @@ export default function HomeScreen() {
                                   gap: 5,
                                   margin: 10,
                                 }}
-                                onPress={() => startReview(book)}
+                                onPress={() => router.push({
+                                  pathname: "/review",
+                                  params: { bookObject: JSON.stringify(book) }
+                                })}
                               >
                                 <Icon
                                   name="pencil"

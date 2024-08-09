@@ -1,7 +1,6 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 import { Icon } from "@rneui/themed";
 import { useState } from "react";
-import Library from "@/app/home/Library";
 import * as LibraryStore from "@/components/LibraryStore";
 export default function AddToShelf(props: any) {
   let [addToShelf, setAddToShelf] = useState(false);

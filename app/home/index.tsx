@@ -1,17 +1,6 @@
-import { useEffect, useState } from "react";
 import {
   Text,
-  View,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  TextInput,
-  Button,
-  ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Alert,
-  ImageBackground,
+  View
 } from "react-native";
 import { Icon } from "@rneui/themed";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -26,17 +15,6 @@ import Swipes from "./Swipes";
 const Tab = createBottomTabNavigator();
 const ModalStack = createStackNavigator();
 export default function Home() {
-  /*useEffect(() => {
-    fetch("http://localhost:3000/api/getUser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        uuid: "test",
-      }),
-    });
-  }, []);*/
   function ModalScreen() {
     return (
         <View

@@ -2,51 +2,22 @@ import { useEffect, useState } from "react";
 import {
   Text,
   View,
-  StyleSheet,
   SafeAreaView,
-  StatusBar,
   TextInput,
-  Button,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
   ImageBackground,
-  Image,
   Pressable,
 } from "react-native";
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
-import * as SecureStore from "expo-secure-store";
-import { Divider, Icon } from "@rneui/themed";
+import * as SecretStore from "@/components/SecretStore";
+import {  Icon } from "@rneui/themed";
+import {Review} from "@/components/Types";
 import styles from "../../assets/styles/style";
-import ReviewItem from "../../components/ReviewItem"
-import AsyncStorage from "@react-native-async-storage/async-storage";
-async function save(key: string, value: string) {
-  await SecureStore.setItemAsync(key, value);
-}
+import ReviewItem from "../../components/ReviewItem";
 
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
-//create a type for the book
-type Review = {
-  title: string;
-  content: string;
-  meta: {
-    title: string;
-    authors: string;
-    etag: string;
-  };
-  username: string;
-  uuid: string;
-  liked: string[];
-};
 export default function Bulletin() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [searchMode, setSearchMode] = useState<number>(1);
@@ -54,7 +25,7 @@ export default function Bulletin() {
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
   let [userUUID, setUserUUID] = useState<any>();
   let [searchResults, setSearchResults] = useState<Review[]>([]);
-    
+
   useEffect(() => {
     searchBooks();
   }, []);
@@ -94,7 +65,7 @@ export default function Bulletin() {
               },
               username: "",
               uuid: "",
-              liked: []
+              liked: [],
             },
           ]);
           return;
@@ -119,7 +90,7 @@ export default function Bulletin() {
       });
   }
   async function searchBooks() {
-    let uuid = await get("uuid");
+    let uuid = await SecretStore.get("uuid");
     setUserUUID(uuid);
     setSearchResults([]);
     fetch(`http://localhost:3000/api/getReviews`, {
@@ -150,7 +121,7 @@ export default function Bulletin() {
               },
               username: "",
               uuid: "",
-              liked: []
+              liked: [],
             },
           ]);
           return;
@@ -366,7 +337,7 @@ export default function Bulletin() {
                               style={{
                                 flexDirection: "row",
                                 gap: 5,
-                                justifyContent: 'space-between'
+                                justifyContent: "space-between",
                               }}
                             >
                               <View
@@ -375,7 +346,7 @@ export default function Bulletin() {
                                   gap: 5,
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  width: "100%"
+                                  width: "100%",
                                 }}
                               >
                                 <Text
@@ -395,7 +366,7 @@ export default function Bulletin() {
                                 gap: 5,
                                 padding: 5,
                                 paddingTop: 10,
-                                margin: 'auto',
+                                margin: "auto",
                                 justifyContent: "center",
                               }}
                             >
@@ -415,7 +386,11 @@ export default function Bulletin() {
                           </View>
                         </View>
                       ) : (
-                        <ReviewItem review={review} key={index} uuid={userUUID} />
+                        <ReviewItem
+                          review={review}
+                          key={index}
+                          uuid={userUUID}
+                        />
                       )
                     ) : (
                       <View
