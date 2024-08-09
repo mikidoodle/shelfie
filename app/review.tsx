@@ -15,7 +15,7 @@ import { Link, router, useLocalSearchParams } from "expo-router";
 export default function ReviewModal() {
   const params = useLocalSearchParams();
   let { bookObject } = params;
-  let book: Book = JSON.parse(bookObject as string);
+  let book: Book = bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
   let [reviewTitle, setReviewTitle] = useState<string>("");
   let [reviewContent, setReviewContent] = useState<string>("");
   let [username, setUsername] = useState<string>("");
@@ -60,24 +60,8 @@ export default function ReviewModal() {
   return (
     <View>
       <View
-      /* style={{
-          flex: 1,
-          justifyContent: "flex-end",
-          alignItems: "flex-end",
-          borderTopRightRadius: 25,
-          borderTopLeftRadius: 25,
-        }}*/
       >
         <View
-        /* style={{
-            top: 0,
-            height: "90%",
-            width: "100%",
-            padding: 0,
-            borderTopRightRadius: 25,
-            borderTopLeftRadius: 25,
-            backgroundColor: "#f9f9f9",
-          }}*/
         >
           <View>
             {(book as Book).etag !== "" ? (

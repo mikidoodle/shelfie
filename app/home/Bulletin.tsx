@@ -312,9 +312,9 @@ export default function Bulletin() {
                         <View
                           style={{
                             backgroundColor: "white",
-                            margin: 10,
                             borderRadius: 9,
-                            width: 325,
+                            width: "100%",
+                            margin: 'auto'
                           }}
                           key={index}
                         >

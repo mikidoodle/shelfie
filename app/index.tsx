@@ -3,10 +3,13 @@ import { Text, View, SafeAreaView } from "react-native";
 import { router } from "expo-router";
 import * as SecretStore from "@/components/SecretStore";
 import styles from "../assets/styles/style";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export default function Index() {
+
   useEffect(() => {
     (async () => {
+      checkIfFirstOpen();
       let uuid = await SecretStore.get("uuid");
       if (uuid) {
         router.replace("home");
@@ -16,6 +19,12 @@ export default function Index() {
       }
     })();
   }, []);
+  async function checkIfFirstOpen() {
+    let firstUse = await AsyncStorage.getItem('firstinstall');
+    if(firstUse === null) {
+      router.push('/firstinstall')
+    }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View

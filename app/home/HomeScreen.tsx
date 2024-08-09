@@ -12,27 +12,20 @@ import {
   Pressable,
 } from "react-native";
 let gradient = require("../../assets/images/homeScreen.png");
-import * as SecretStore from "@/components/SecretStore";
 import { Icon } from "@rneui/themed";
 import { Book } from "@/components/Types";
 import styles from "../../assets/styles/style";
 import GestureRecognizer from "react-native-swipe-gestures";
 import ResponsiveImage from "@/components/ResponsiveImage";
-import * as LibraryStore from "../../components/LibraryStore";
 import AddToShelf from "@/components/AddToShelf";
 import { router } from "expo-router";
-
+import SearchItem from "@/components/SearchItem";
 
 export default function HomeScreen() {
   let [searchQuery, setSearchQuery] = useState<string>("");
   let [isSearching, setIsSearching] = useState<boolean>(false);
-  let [username, setUsername] = useState<any>("");
-  let [uuid, setUUID] = useState<any>("");
   let [searchResults, setSearchResults] = useState<Book[]>([]);
   let [modalVisible, setModalVisible] = useState(false);
-  let [modalContent, setModalContent] = useState<ReactElement>();
-  let [reviewTitle, setReviewTitle] = useState<string>("");
-  let [reviewContent, setReviewContent] = useState<string>("");
   function searchBooks(query: string) {
     if (query.length > 0) {
       console.log("search: accepted");
@@ -79,76 +72,6 @@ export default function HomeScreen() {
       setSearchResults([]);
     }
   }
-
-  useEffect(() => {
-    (async () => {
-      let uuidC = await SecretStore.get("uuid");
-      let usernameC = await SecretStore.get("username");
-      setUsername(usernameC);
-      setUUID(uuidC);
-    })();
-  }, []);
-
-  async function submitReview(book: Book) {
-    var res = await fetch("http://localhost:3000/api/addReview", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: reviewTitle,
-        content: reviewContent,
-        book: book,
-        uuid: uuid,
-        username: username,
-      }),
-    });
-    let data = await res.json();
-    if (data.error) {
-      Alert.alert(data.message);
-      return;
-    } else {
-      Alert.alert(data.message);
-      setModalVisible(false);
-    }
-  }
-  const startReview = async (book: Book) => {
-   /* setModalContent(
-      modal content was here
-    );*/
-    setModalVisible(true);
-  };
-  async function addISBN(book: Book) {
-    await LibraryStore.storeBook(book.etag, book);
-    Alert.alert("Book added to shelf!");
-    /* fetch("http://localhost:3000/api/addISBN", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        isbn: encodeURIComponent(
-          JSON.stringify({
-            title: book.title,
-            authors: book.authors,
-            description: book.description,
-            etag: book.etag,
-            category: book.category,
-          })
-        ),
-        uuid: uuidC,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          Alert.alert(data.message);
-          return;
-        } else {
-          Alert.alert(data.message);
-        }
-      });*/
-  }
   return (
     <ImageBackground
       source={gradient}
@@ -166,11 +89,17 @@ export default function HomeScreen() {
             flex: 1,
           }}
         >
-          {/*modal was here*/}
           <ScrollView>
             <SafeAreaView style={styles.container}>
               <View>
-                <Text style={styles.title}>shelfie!</Text>
+                <Pressable
+                  onPress={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                >
+                  <Text style={styles.title}>shelfie!</Text>
+                </Pressable>
                 <View
                   style={{
                     flexDirection: "row",
@@ -235,105 +164,7 @@ export default function HomeScreen() {
                   {searchResults.length > 0 && searchQuery !== ""
                     ? searchResults.map((book: Book, index: number) =>
                         book.etag !== "404shelfieerror" ? (
-                          <View
-                            style={{
-                              backgroundColor: "white",
-                              margin: 10,
-                              borderRadius: 9,
-                              width: "90%",
-                            }}
-                            key={index}
-                          >
-                            {book.etag !== "" ? (
-                              <ResponsiveImage
-                                url={`https://covers.openlibrary.org/b/olid/${book.etag}-M.jpg`}
-                                style={{
-                                  width: "100%",
-                                  height: 150,
-                                  margin: "auto",
-                                  borderTopLeftRadius: 9,
-                                  borderTopRightRadius: 9,
-                                }}
-                              />
-                            ) : null}
-                            <View
-                              style={{
-                                padding: 10,
-                                shadowColor: "#37B7C3",
-                              }}
-                            >
-                              <Text
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                {book.title}
-                              </Text>
-                              <Text
-                                style={{
-                                  fontFamily: "Menlo",
-                                  textTransform: "uppercase",
-                                  paddingBottom: 5,
-                                  paddingTop: 5,
-                                }}
-                              >
-                                {book.authors}
-                              </Text>
-                              <Text>{book.description}</Text>
-                            </View>
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "space-evenly",
-                                gap: 5,
-                                borderBottomLeftRadius: 9,
-                                borderBottomRightRadius: 9,
-                                borderWidth: 2,
-                                borderColor: "#37B7C3",
-                              }}
-                            >
-                              <Pressable
-                                style={{
-                                  flexDirection: "row",
-                                  justifyContent: "center",
-                                  gap: 5,
-                                  margin: 10,
-                                }}
-                                onPress={() => router.push({
-                                  pathname: "/review",
-                                  params: { bookObject: JSON.stringify(book) }
-                                })}
-                              >
-                                <Icon
-                                  name="pencil"
-                                  type="octicon"
-                                  size={20}
-                                  style={{
-                                    verticalAlign: "middle",
-                                    marginTop: 2,
-                                  }}
-                                  color={"#37B7C3"}
-                                />
-                                <Text
-                                  style={{
-                                    fontSize: 20,
-                                    color: "#37B7C3",
-                                  }}
-                                >
-                                  review
-                                </Text>
-                              </Pressable>
-                              <View
-                                style={{
-                                  height: "100%",
-                                  width: 2,
-                                  backgroundColor: "#37B7C3",
-                                }}
-                              />
-                              <AddToShelf book={book} />
-                            </View>
-                          </View>
+                          <SearchItem book={book} key={index} />
                         ) : (
                           <View
                             style={{

@@ -92,6 +92,7 @@ export default function Index() {
                 placeholder="username or email"
                 keyboardType="default"
                 autoCapitalize="none"
+                autoComplete="off"
               />
               <TextInput
                 style={styles.input}

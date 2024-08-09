@@ -100,7 +100,7 @@ export default styles = StyleSheet.create({
     borderWidth: 0,
     borderColor: "lightgrey",
     padding: 10,
-    width: "80%",
+    width: "75%",
     borderRadius: 9,
     backgroundColor: "white",
   },
