@@ -67,7 +67,20 @@ export default function HomeScreen() {
           }
           setSearchResults(mapSearchResults);
           setIsSearching(false);
-        });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setSearchResults([
+            {
+              title: "You're offline!",
+              authors: "",
+              description: "Connect to the internet to search for books.",
+              etag: "404shelfieerror",
+              category: [],
+            },
+          ]);
+          setIsSearching(false);
+        })
     } else {
       setSearchResults([]);
     }

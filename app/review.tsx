@@ -15,13 +15,14 @@ import { Link, router, useLocalSearchParams } from "expo-router";
 export default function ReviewModal() {
   const params = useLocalSearchParams();
   let { bookObject } = params;
-  let book: Book = bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
+  let book: Book =
+    bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
   let [reviewTitle, setReviewTitle] = useState<string>("");
   let [reviewContent, setReviewContent] = useState<string>("");
   let [username, setUsername] = useState<string>("");
   let [uuid, setUUID] = useState<string>("");
   async function submitReview() {
-    var res = await fetch(`${APIEndpoint}/api/addReview`, {
+    fetch(`${APIEndpoint}/api/addReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,15 +34,21 @@ export default function ReviewModal() {
         uuid: uuid,
         username: username,
       }),
+    }).then((res) => {
+      return res.json();
+    }).then((data) => {
+      if (data.error) {
+        Alert.alert(data.message);
+        router.dismiss();
+      } else {
+        Alert.alert(data.message);
+      }
+    }).catch((err) => {
+      Alert.alert("An error occurred. Please try again later.");
+      router.dismiss();
+      console.log(err);
     });
-    let data = await res.json();
-    if (data.error) {
-      Alert.alert(data.message);
-      router.dismiss()
-    } else {
-      Alert.alert(data.message);
-      
-    }
+    
   }
   useEffect(() => {
     (async () => {
@@ -53,16 +60,13 @@ export default function ReviewModal() {
       if (uuid !== null) {
         setUUID(uuid);
       }
-
     })();
   });
   const isPresented = router.canGoBack();
   return (
     <View>
-      <View
-      >
-        <View
-        >
+      <View>
+        <View>
           <View>
             {(book as Book).etag !== "" ? (
               <Image

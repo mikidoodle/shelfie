@@ -19,11 +19,12 @@ export default function ReviewItem(props: ReviewPropItem) {
   let [likeCount, setLikeCount] = useState(review.liked.length);
   let [bookmarked, setBookmarked] = useState(false);
   LibraryStore.getBook(review.meta.etag).then((data) => {
+    console.log(review.meta.title, data);
     setBookmarked(data !== null);
   });
   async function remotelyAddToLibrary() {
     let uuid = await get("uuid");
-    setBookmarked(true);
+    setBookmarked(await LibraryStore.getBook(review.meta.etag) !== null);
     await LibraryStore.storeBook(review.meta.etag, {
       title: review.meta.title,
     });
@@ -47,13 +48,7 @@ export default function ReviewItem(props: ReviewPropItem) {
             etag: review.meta.etag,
             category: book.subject || [],
           };
-          await LibraryStore.storeBook(review.meta.etag, {
-            title: book.title,
-            authors: book.authors,
-            description: book.description,
-            etag: book.cover_edition_key,
-            category: book.category,
-          });
+          LibraryStore.storeBook(review.meta.etag, bookInfo);
         } else {
           Alert.alert("Error", "Could not find book");
         }

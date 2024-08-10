@@ -1,14 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import ResponsiveImage from "./ResponsiveImage";
+import { router } from "expo-router";
+import { Icon } from "@rneui/themed";
 export default function LibraryItem(props: any) {
   let [title, setTitle] = useState<string>("");
   let [authors, setAuthors] = useState<string>("");
   let [description, setDescription] = useState<string>("");
+  let [fullBookData, setFullBookData] = useState<object>({})
   async function loadData() {
     let book = await AsyncStorage.getItem(`@shelfie:${props.etag}`);
     let bookObject = book ? JSON.parse(book) : null;
+    setFullBookData(bookObject)
     setTitle(bookObject.title);
     setAuthors(bookObject.authors);
     setDescription(bookObject.description);
@@ -59,6 +63,41 @@ export default function LibraryItem(props: any) {
           {authors}
         </Text>
         <Text>{description}</Text>
+        <Pressable
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 5,
+            margin: 10,
+          }}
+          onPress={() =>
+            router.push({
+              pathname: "/review",
+              params: {
+                bookObject: JSON.stringify(fullBookData),
+              },
+            })
+          }
+        >
+          <Icon
+            name="pencil"
+            type="octicon"
+            size={20}
+            style={{
+              verticalAlign: "middle",
+              marginTop: 2,
+            }}
+            color={"#37B7C3"}
+          />
+          <Text
+            style={{
+              fontSize: 20,
+              color: "#37B7C3",
+            }}
+          >
+            review
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

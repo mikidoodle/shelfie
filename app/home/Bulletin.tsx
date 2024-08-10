@@ -13,8 +13,8 @@ import {
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
 import * as SecretStore from "@/components/SecretStore";
-import {  Icon } from "@rneui/themed";
-import {Review} from "@/components/Types";
+import { Icon } from "@rneui/themed";
+import { Review } from "@/components/Types";
 import styles from "../../assets/styles/style";
 import ReviewItem from "../../components/ReviewItem";
 import { APIEndpoint } from "@/components/Types";
@@ -87,6 +87,23 @@ export default function Bulletin() {
           reviewResults.push(reviewData);
         });
         setSearchResults(reviewResults);
+      })
+      .catch((e) => {
+        console.log(e);
+        setSearchResults([
+          {
+            title: "You're offline!",
+            content: "Connect to the internet to search for users.",
+            meta: {
+              title: "",
+              authors: "",
+              etag: "404shelfieerror",
+            },
+            username: "",
+            uuid: "",
+            liked: [],
+          },
+        ]);
       });
   }
   async function searchBooks() {
@@ -143,6 +160,23 @@ export default function Bulletin() {
           reviewResults.push(reviewData);
         });
         setSearchResults(reviewResults.reverse());
+      })
+      .catch((e) => {
+        console.log(e);
+        setSearchResults([
+          {
+            title: "You're offline!",
+            content: "Connect to the internet to search for reviews.",
+            meta: {
+              title: "",
+              authors: "",
+              etag: "404shelfieerror",
+            },
+            username: "",
+            uuid: "",
+            liked: [],
+          },
+        ]);
       });
   }
 
@@ -162,7 +196,12 @@ export default function Bulletin() {
                   justifyContent: "space-between",
                 }}
               >
+                <Pressable onPress={() => {
+                  setSearchQuery("");
+                  searchBooks();
+                }}>
                 <Text style={styles.title}>explore</Text>
+                </Pressable>
                 <Pressable onPress={searchHandler}>
                   <Icon
                     name="sync"
@@ -313,8 +352,9 @@ export default function Bulletin() {
                           style={{
                             backgroundColor: "white",
                             borderRadius: 9,
-                            width: "100%",
-                            margin: 'auto'
+                            width: 325,
+                            marginTop: 10,
+                            margin: "auto",
                           }}
                           key={index}
                         >

@@ -29,7 +29,7 @@ export default function SwipeScreen({
   let { book, swipeSuggestions, currentIndex } = route.params;
   let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
   console.log(book, swipeSuggestions, currentIndex);
-  const pan = useRef(new Animated.ValueXY()).current;
+ /* const pan = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -54,7 +54,7 @@ export default function SwipeScreen({
         }
       },
     })
-  ).current;
+  ).current;*/
   async function loadNextBook(feedback: string) {
     if (currentIndex === swipeSuggestions.length - 1) {
       setNextSwipeLoading(1);
@@ -193,9 +193,18 @@ export default function SwipeScreen({
             </View>
           ) : (
             <>
-              <Animated.View
+             {/* <Animated.View*/}
+             <View
                 style={{
-                  transform: [
+                  height: "80%",
+                  width: "90%",
+                  margin: "auto",
+                  backgroundColor: "#f8f8f8",
+                  borderColor: "white",
+                  borderWidth: 2,
+                  borderRadius: 25,
+                  marginBottom: 10,
+                /*transform: [
                     {
                       translateX: pan.x.interpolate({
                         inputRange: [-200, 0, 200],
@@ -218,21 +227,14 @@ export default function SwipeScreen({
                       }),
                     },
                   ],
-                  height: "80%",
-                  width: "90%",
-                  margin: "auto",
-                  backgroundColor: "#f8f8f8",
-                  borderColor: "white",
-                  borderWidth: 2,
-                  borderRadius: 25,
-                  marginBottom: 10,
                   opacity: pan.x.interpolate({
                     inputRange: [-200, 0, 200],
                     outputRange: [0.5, 1, 0.5],
                     extrapolate: "clamp",
                   }),
                 }}
-                {...panResponder.panHandlers}
+                {...panResponder.panHandlers}*/
+                }}
               >
                 <ScrollView
                   style={{
@@ -269,7 +271,7 @@ export default function SwipeScreen({
                     <Text style={{ fontSize: 20 }}>{book.description}</Text>
                   </View>
                 </ScrollView>
-              </Animated.View>
+                </View> {/*</Animated.View>*/}
               <View
                 style={{
                   flexDirection: "row",

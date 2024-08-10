@@ -7,7 +7,6 @@ export async function storeBook(etag: string, book: object) {
     let parsedBookList = bookList ? bookList.split(",") : [];
     if (parsedBookList.includes(etag)) {
       await AsyncStorage.removeItem(`@shelfie:${etag}`);
-      //remove etag from booklist
       const index = parsedBookList.indexOf(etag);
       if (index > -1) {
         parsedBookList.splice(index, 1);
@@ -17,6 +16,7 @@ export async function storeBook(etag: string, book: object) {
       await AsyncStorage.setItem(`@shelfie:${etag}`, JSON.stringify(book));
       parsedBookList.push(etag);
       await AsyncStorage.setItem(`@shelfie:booklist`, parsedBookList.join(","));
+      console.log("added to library");
     }
   } catch (error) {
     Alert.alert("Error saving book to library.");
@@ -40,7 +40,7 @@ export async function clearLibrary() {
       parsedBookList[i] = `@shelfie:${parsedBookList[i]}`
     }
     await AsyncStorage.multiRemove(parsedBookList);
-    await AsyncStorage.setItem(`@shelfie:booklist`, '[]')
+    await AsyncStorage.setItem(`@shelfie:booklist`, '')
     Alert.alert("Library cleared!")
   } catch (e) {
     Alert.alert("Error clearing library");

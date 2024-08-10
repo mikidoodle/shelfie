@@ -25,7 +25,6 @@ export default function Library() {
     setSearchResults([]);
     let bookList = await AsyncStorage.getItem(`@shelfie:booklist`);
     let parsedBookList = bookList ? bookList.split(",") : [];
-    console.log(parsedBookList);
     if (parsedBookList.length === 0) {
       setSearchResults(["404shelfieerror"]);
     } else {

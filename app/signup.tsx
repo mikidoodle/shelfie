@@ -47,6 +47,11 @@ export default function Index() {
           await SecretStore.set("username", data.username);
           router.replace("/");
         }
+      })
+      .catch((err) => {
+        Alert.alert("An error occurred. Please try again later.");
+        setDisabled(false);
+        console.log(err);
       });
     } else {
       Alert.alert("Username must be between 1 and 16 characters and only contain letters, numbers, periods, and underscores.");

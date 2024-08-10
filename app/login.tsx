@@ -53,6 +53,11 @@ export default function Index() {
           setDisabled(false);
           router.replace("/");
         }
+      })
+      .catch((err) => {
+        Alert.alert("An error occurred. Please try again later.");
+        setDisabled(false);
+        console.log(err);
       });
   }
   return (
