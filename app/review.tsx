@@ -6,18 +6,45 @@ import {
   Pressable,
   Text,
   Alert,
+  Keyboard,
+  
 } from "react-native";
 import styles from "@/assets/styles/style";
 import { useEffect, useState } from "react";
 import * as SecretStore from "@/components/SecretStore";
 import { APIEndpoint, Book } from "@/components/Types";
 import { Link, router, useLocalSearchParams } from "expo-router";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { Picker } from "@react-native-picker/picker";
 export default function ReviewModal() {
   const params = useLocalSearchParams();
   let { bookObject } = params;
   let book: Book =
     bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
   let [reviewTitle, setReviewTitle] = useState<string>("");
+  let [emotions, setEmotions] = useState<any>([]);
+  const emotionSelect = [
+    { id: 0, name: "Happy" },
+    { id: 1, name: "Sad" },
+    { id: 2, name: "Excited" },
+    { id: 3, name: "Angry" },
+    { id: 4, name: "Confused" },
+    { id: 5, name: "Inspired" },
+    { id: 6, name: "Nostalgic" },
+    { id: 7, name: "Hopeful" },
+    { id: 8, name: "Anxious" },
+    { id: 9, name: "Frustrated" },
+    { id: 10, name: "Content" },
+    { id: 11, name: "Surprised" },
+    { id: 12, name: "Relieved" },
+    { id: 13, name: "Disappointed" },
+    { id: 14, name: "Curious" },
+    { id: 15, name: "Empathetic" },
+    { id: 16, name: "Peaceful" },
+    { id: 17, name: "Motivated" },
+    { id: 18, name: "Amused" },
+    { id: 19, name: "Reflective" },
+  ];
   let [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   let [reviewContent, setReviewContent] = useState<string>("");
   let [username, setUsername] = useState<string>("");
@@ -36,27 +63,29 @@ export default function ReviewModal() {
         uuid: uuid,
         username: username,
       }),
-    }).then((res) => {
-      return res.json();
-    }).then((data) => {
-      if (data.error) {
-        Alert.alert(data.message);
-        if(router.canGoBack()) {
-          router.dismiss();
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        if (data.error) {
+          Alert.alert(data.message);
+          if (router.canGoBack()) {
+            router.dismiss();
+          } else {
+            router.push("home");
+          }
         } else {
-          router.push("home")
+          setDisableSubmit(false);
+          Alert.alert(data.message);
         }
-      } else {
+      })
+      .catch((err) => {
         setDisableSubmit(false);
-        Alert.alert(data.message);
-      }
-    }).catch((err) => {
-      setDisableSubmit(false);
-      Alert.alert("An error occurred. Please try again later.");
-      router.dismiss();
-      console.log(err);
-    });
-    
+        Alert.alert("An error occurred. Please try again later.");
+        router.dismiss();
+        console.log(err);
+      });
   }
   useEffect(() => {
     (async () => {
@@ -155,6 +184,62 @@ export default function ReviewModal() {
               keyboardType="default"
               autoCapitalize="none"
             />
+            {/*<MultiSelect
+              hideTags
+              items={emotionSelect}
+              uniqueKey="id"
+              onSelectedItemsChange={setEmotions}
+              selectedItems={emotions}
+              selectText="Pick Items"
+              searchInputPlaceholderText="Search Items..."
+              onChangeInput={(text) => console.log(text)}
+              tagRemoveIconColor="#CCC"
+              tagBorderColor="#CCC"
+              tagTextColor="#CCC"
+              selectedItemTextColor="#CCC"
+              selectedItemIconColor="#CCC"
+              itemTextColor="#000"
+              displayKey="name"
+              searchInputStyle={{ color: "#000" }}
+              submitButtonColor="#CCC"
+              submitButtonText="Submit"
+            />
+            <View style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              padding: 5,
+            }}>
+              {emotions.map((emotion) => {
+                return (
+                  <View
+                    style={{
+                      backgroundColor: "black",
+                      borderRadius: 9,
+                      padding: 10,
+                      margin: 5,
+                    }}
+                    key={emotion}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                      }}
+                    >
+                      {emotionSelect[parseInt(emotion)].name}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>*/}
+            <Picker
+              selectedValue={emotions[0]}
+              onValueChange={(itemValue) =>
+                setEmotions([itemValue, emotions[1], emotions[2]])
+              }
+            >
+              <Picker.Item label="Java" value="java" />
+              <Picker.Item label="JavaScript" value="js" />
+            </Picker>
             <TextInput
               style={styles.reviewContentInput}
               placeholder="Write your review here!"

@@ -1,10 +1,11 @@
-import {  useState } from "react";
+import { useState } from "react";
 import {
   Text,
   View,
   SafeAreaView,
   ImageBackground,
   Pressable,
+  Alert,
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 let gradient = require("../../../assets/images/homeScreen.png");
@@ -25,7 +26,7 @@ export default function Start({
   async function startSwiping() {
     setNextSwipeLoading(true);
     let uuid = await SecretStore.get("uuid");
-    fetch(`http://localhost:3000/api/getSwipes`, {
+    fetch(`https://shelfie.pidgon.com/api/getSwipes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,10 +37,18 @@ export default function Start({
     })
       .then((response) => response.json())
       .then((response) => {
+        if(response.error) {
+          navigation.navigate("SwipeScreen", {
+            bookData: {},
+            swipeSuggestionsData: {},
+            currentIndexData: 1000
+          });
+          return;
+        }
         let swipeSuggestionsUF = JSON.parse(response.message);
         let swipeSuggestions: any = [];
         for (let i = 0; i < swipeSuggestionsUF.length; i++) {
-          swipeSuggestions.push({title: swipeSuggestionsUF[i], feedback: ""});
+          swipeSuggestions.push({ title: swipeSuggestionsUF[i], feedback: "" });
         }
         console.log(
           `https://openlibrary.org/search.json?title=${encodeURIComponent(
@@ -49,7 +58,7 @@ export default function Start({
         fetch(
           `https://openlibrary.org/search.json?title=${encodeURIComponent(
             swipeSuggestions[0].title
-          )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
+          )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=1&lang=en`
         )
           .then((response) => response.json())
           .then((response) => {
@@ -76,9 +85,14 @@ export default function Start({
             navigation.navigate("SwipeScreen", {
               bookData: bookInfo,
               swipeSuggestionsData: swipeSuggestions,
-              currentIndexData: 0,
+              currentIndexData: 0
             });
           });
+      })
+      .catch((e) => {
+        setNextSwipeLoading(false);
+        console.log(e);
+        Alert.alert("An error occurred. Please try again later.");
       });
   }
 
@@ -132,7 +146,7 @@ export default function Start({
                 }}
                 color={"black"}
               />
-               to dislike a book
+              to dislike a book
             </Text>
             <Text style={{ fontSize: 20 }}>
               <Icon
@@ -150,10 +164,10 @@ export default function Start({
               />
               to pass
             </Text>
-            <Pressable onPress={startSwiping}>
+            <Pressable onPress={startSwiping} disabled={nextSwipeLoading}>
               <View
                 style={{
-                  backgroundColor: "black",
+                  backgroundColor: nextSwipeLoading ? "grey" : "black",
                   padding: 10,
                   borderRadius: 25,
                   marginTop: 20,

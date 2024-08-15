@@ -145,7 +145,7 @@ export default function Bulletin() {
                 searchQuery === "" ? "No reviews yet!" : "No reviews found :(",
               content:
                 searchQuery === ""
-                  ? "Write one of your own from the home screen!"
+                  ? "Write one of your own from the search page!"
                   : "",
               meta: {
                 title: "",

@@ -25,7 +25,7 @@ export default function UserProfile() {
       if (uuid !== null) {
         setUUID(uuid);
       }
-      fetch("http://localhost:3000/api/getUserProfile", {
+      fetch("https://shelfie.pidgon.com/api/getUserProfile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,6 +46,11 @@ export default function UserProfile() {
             setVerified(data.verified);
             setReviews(data.reviews);
           }
+        })
+        .catch((err) => {
+          console.log(err);
+          Alert.alert("An error occurred. Please try again later.");
+          router.dismiss();
         });
     });
   }, []);

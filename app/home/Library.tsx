@@ -118,7 +118,7 @@ export default function Library() {
                         >
                           No books in your library.
                         </Text>
-                        <Text> Add one from the home screen!</Text>
+                        <Text> Add one from the search page!</Text>
                       </View>
                     )
                   )

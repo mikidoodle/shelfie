@@ -9,6 +9,7 @@ import {
   Pressable,
   Animated,
   PanResponder,
+  Alert,
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 let gradient = require("../../../assets/images/homeScreen.png");
@@ -30,49 +31,29 @@ export default function SwipeScreen({
   let [book, setBookData] = useState<Book>(bookData);
   let [swipeSuggestions, setSwipeSuggestionsData] =
     useState<any>(swipeSuggestionsData);
+  let [lastBookTitle, setLastBookTitle] = useState<string>("");
+  let [lastBookFeedback, setLastBookFeedback] = useState<string>("");
   let [currentIndex, setCurrentIndexData] = useState<number>(currentIndexData);
   let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
-  // useEffect(() => {
+  useEffect(() => {
+    if (currentIndexData === 1000) {
+      setNextSwipeLoading(2);
+    }
+  }, []);
   console.log(`-------------------\n`);
   console.log(`swipeSuggestions: ${JSON.stringify(swipeSuggestions)}`);
   console.log(`currentIndex: ${currentIndex}`);
   console.log(`-------------------\n`);
-  /* }, [
-    bookData,
-  ]);*/
-  /*const pan = useRef(new Animated.ValueXY()).current;
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
-        useNativeDriver: false,
-      }),
-      onPanResponderRelease: (a, b) => {
-        Animated.spring(
-          pan, // Auto-multiplexed
-          { toValue: { x: 0, y: 0 }, useNativeDriver: true } // Back to zero
-        ).start();
-        if (b.dx > 80) {
-          console.log("Swipe right");
-          setTimeout(() => {
-            loadNextBook("like");
-          }, 500);
-        } else if (b.dx < -80) {
-          console.log("Swipe left");
-          setTimeout(() => {
-            loadNextBook("dislike");
-          }, 500);
-        }
-      },
-    })
-  ).current;*/
   function swipeHandler(dir: string) {
     if (dir === "left") {
       loadNextBook("dislike");
     } else if (dir === "right") {
       loadNextBook("like");
+    } else if (dir === "up") {
+      loadNextBook("neutral");
     }
   }
+
   async function loadNextBook(feedback: string) {
     if (currentIndex === swipeSuggestions.length - 1) {
       let localSwipeSuggestions = swipeSuggestions;
@@ -83,11 +64,6 @@ export default function SwipeScreen({
         swipes[i] = JSON.stringify(swipes[i]);
       }
       setNextSwipeLoading(1);
-      /*swipeFeedback[currentIndex].title = book.title;
-      swipeFeedback[currentIndex].feedback = feedback;
-      swipeFeedback[currentIndex] = JSON.stringify(
-        swipeFeedback[currentIndex]
-      );*/
       let uuid = await SecretStore.get("uuid");
       fetch(`https://shelfie.pidgon.com/api/saveSwipes`, {
         method: "POST",
@@ -96,7 +72,7 @@ export default function SwipeScreen({
         },
         body: JSON.stringify({
           uuid: uuid,
-          swipes: JSON.stringify(swipeSuggestions),
+          swipes: JSON.stringify(swipes),
         }),
       })
         .then((response) => response.json())
@@ -104,6 +80,11 @@ export default function SwipeScreen({
           if (response.error === false) {
             setNextSwipeLoading(2);
           }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setNextSwipeLoading(0);
+          Alert.alert("Error", "Could not save swipes");
         });
     } else {
       console.log("loading next book");
@@ -124,7 +105,7 @@ export default function SwipeScreen({
       fetch(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           swipeSuggestions[currentIndex + 1].title
-        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
+        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=1&lang=en`
       )
         .then((response) => response.json())
         .then((response) => {
@@ -148,15 +129,21 @@ export default function SwipeScreen({
               : "",
             category: category.join(", "),
           };
+          setLastBookTitle(book.title);
+          setLastBookFeedback(feedback === "" ? lastBookFeedback : feedback);
           setSwipeSuggestionsData(localSwipeSuggestions);
           setBookData(bookInfo);
           setCurrentIndexData(currentIndex + 1);
-
           /*navigation.navigate("SwipeScreen", {
             book: bookInfo,
             swipeSuggestions: swipeSuggestionsData,
             currentIndex: currentIndex+1,
           });*/
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setNextSwipeLoading(0);
+          Alert.alert("Error", "Could not load next book");
         });
     }
   }
@@ -226,7 +213,7 @@ export default function SwipeScreen({
             <>
               <TinderCard
                 onSwipe={(dir) => swipeHandler(dir)}
-                preventSwipe={["up", "down"]}
+                preventSwipe={["down"]}
                 swipeRequirementType="velocity"
               >
                 <View
@@ -240,36 +227,6 @@ export default function SwipeScreen({
                     borderRadius: 25,
                     marginBottom: 10,
                   }}
-                  /*transform: [
-                    {
-                      translateX: pan.x.interpolate({
-                        inputRange: [-200, 0, 200],
-                        outputRange: [-200, 0, 200],
-                        extrapolate: "clamp",
-                      }),
-                    },
-                    {
-                      translateY: pan.x.interpolate({
-                        inputRange: [-200, 0, 200],
-                        outputRange: [-70, 0, -70],
-                        extrapolate: "clamp",
-                      }),
-                    },
-                    {
-                      rotate: pan.x.interpolate({
-                        inputRange: [-200, 0, 200],
-                        outputRange: ["-15deg", "0deg", "15deg"],
-                        extrapolate: "clamp",
-                      }),
-                    },
-                  ],
-                  opacity: pan.x.interpolate({
-                    inputRange: [-200, 0, 200],
-                    outputRange: [0.5, 1, 0.5],
-                    extrapolate: "clamp",
-                  }),
-                }}
-                {...panResponder.panHandlers}*/
                 >
                   <ScrollView
                     style={{
