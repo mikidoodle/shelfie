@@ -18,11 +18,13 @@ export default function ReviewModal() {
   let book: Book =
     bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
   let [reviewTitle, setReviewTitle] = useState<string>("");
+  let [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   let [reviewContent, setReviewContent] = useState<string>("");
   let [username, setUsername] = useState<string>("");
   let [uuid, setUUID] = useState<string>("");
   async function submitReview() {
-    fetch(`${APIEndpoint}/api/addReview`, {
+    setDisableSubmit(true);
+    fetch(`https://shelfie.pidgon.com/api/addReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,11 +41,17 @@ export default function ReviewModal() {
     }).then((data) => {
       if (data.error) {
         Alert.alert(data.message);
-        router.dismiss();
+        if(router.canGoBack()) {
+          router.dismiss();
+        } else {
+          router.push("home")
+        }
       } else {
+        setDisableSubmit(false);
         Alert.alert(data.message);
       }
     }).catch((err) => {
+      setDisableSubmit(false);
       Alert.alert("An error occurred. Please try again later.");
       router.dismiss();
       console.log(err);
@@ -112,6 +120,7 @@ export default function ReviewModal() {
                     borderRadius: 9,
                   }}
                   onPress={submitReview}
+                  disabled={disableSubmit}
                 >
                   <Text
                     style={{
@@ -120,7 +129,7 @@ export default function ReviewModal() {
                       verticalAlign: "middle",
                     }}
                   >
-                    Post Review!
+                    {disableSubmit ? "Submitting..." : "Submit"}
                   </Text>
                 </Pressable>
               </View>

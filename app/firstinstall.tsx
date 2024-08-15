@@ -14,7 +14,7 @@ import { router } from "expo-router";
 export default function FirstInstall() {
   async function closeFirstInstall() {
     AsyncStorage.setItem("firstinstall", "false").then(() => {
-      router.replace("/signup");
+      router.replace("/login");
     });
   }
   return (

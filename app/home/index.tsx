@@ -1,45 +1,40 @@
-import {
-  Text,
-  View
-} from "react-native";
+import { Text, View } from "react-native";
 import { Icon } from "@rneui/themed";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {createStackNavigator} from "@react-navigation/stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
 import Library from "./Library";
 import Settings from "./Settings";
 import styles from "../../assets/styles/style";
 import Bulletin from "./Bulletin";
 import Swipes from "./Swipes";
+import UserProfile from "../profile";
 
 const Tab = createBottomTabNavigator();
 const ModalStack = createStackNavigator();
 export default function Home() {
   function ModalScreen() {
     return (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 20,
-            backgroundColor: "#F8F8F8",
-            shadowColor: "#37B7C3",
-            shadowOpacity: 0.5,
-            shadowRadius: 48,
-            elevation: 5,
-          }}
-        >
-          <Text>hi</Text>
-        </View>)
-
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 20,
+          backgroundColor: "#F8F8F8",
+          shadowColor: "#37B7C3",
+          shadowOpacity: 0.5,
+          shadowRadius: 48,
+          elevation: 5,
+        }}
+      >
+        <Text>hi</Text>
+      </View>
+    );
   }
   return (
     <>
-    <ModalStack.Group screenOptions={{ presentation: 'modal' }}>
-       <ModalStack.Screen name="Review Modal" component={ModalScreen} />
-       </ModalStack.Group>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -60,10 +55,11 @@ export default function Home() {
           },
           tabBarActiveTintColor: "#37B7C3",
           tabBarIconStyle: styles.tabBarIcon,
-        }}>
+        }}
+      >
         <Tab.Screen
-          name="Home"
-          component={HomeScreen}
+          name="Bulletin"
+          component={Bulletin}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Icon name="home" type="octicon" color={color} />
@@ -71,14 +67,15 @@ export default function Home() {
           }}
         />
         <Tab.Screen
-          name="Bulletin"
-          component={Bulletin}
+          name="Home"
+          component={HomeScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Icon name="telescope" type="octicon" color={color} />
             ),
           }}
         />
+
         <Tab.Screen
           name="Swipe"
           component={Swipes}
@@ -108,6 +105,6 @@ export default function Home() {
           }}
         />
       </Tab.Navigator>
-      </>
+    </>
   );
 }

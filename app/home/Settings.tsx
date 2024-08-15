@@ -22,7 +22,11 @@ export default function Settings() {
   let [openAIKey, setOpenAIKey] = useState<string>("");
   let [preExistingKey, setPreExistingKey] = useState<string>("");
   let [hasOpenAIKey, setHasOpenAIKey] = useState<boolean>(false);
+  let [username, setUsername] = useState<string>("");
   useEffect(() => {
+    SecretStore.get("username").then((data) => {
+      setUsername(data === null ? "" : data);
+    });
     SecretStore.get("openAIKey").then((data) => {
       setHasOpenAIKey(data !== null);
       setPreExistingKey(data === null ? "" : data);
@@ -173,7 +177,7 @@ export default function Settings() {
                     style={{ paddingRight: 5 }}
                     color={"black"}
                   />
-                  Log out
+                  Log out <Text style={{color: "#37B7C3"}}>@{username}</Text>
                 </Text>
               </Pressable>
             </View>

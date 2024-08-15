@@ -18,6 +18,12 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
+        name="profile"
+        options={{
+          presentation: "modal"
+        }}
+      />
+      <Stack.Screen
         name="firstinstall"
         options={{
           presentation: "modal",

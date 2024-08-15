@@ -26,7 +26,7 @@ export default function Index() {
   function Signup() {
     if(/^[a-zA-Z0-9._]{1,16}$/.test(changeUsername)) {
     setDisabled(true);
-    fetch(`${APIEndpoint}/api/signup`, {
+    fetch(`https://shelfie.pidgon.com/api/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export default function Index() {
         if (data.error === false) {
           await SecretStore.set("uuid", data.uuid);
           await SecretStore.set("username", data.username);
-          router.replace("/");
+          router.push("/login");
         }
       })
       .catch((err) => {

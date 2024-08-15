@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
@@ -16,7 +16,7 @@ import { Icon } from "@rneui/themed";
 import styles from "../../../assets/styles/style";
 import * as SecretStore from "@/components/SecretStore";
 import { APIEndpoint, Book } from "@/components/Types";
-
+import TinderCard from "react-tinder-card";
 const Stack = createNativeStackNavigator();
 
 export default function SwipeScreen({
@@ -26,10 +26,21 @@ export default function SwipeScreen({
   navigation: any;
   route: any;
 }) {
-  let { book, swipeSuggestions, currentIndex } = route.params;
+  let { bookData, swipeSuggestionsData, currentIndexData } = route.params;
+  let [book, setBookData] = useState<Book>(bookData);
+  let [swipeSuggestions, setSwipeSuggestionsData] =
+    useState<any>(swipeSuggestionsData);
+  let [currentIndex, setCurrentIndexData] = useState<number>(currentIndexData);
   let [nextSwipeLoading, setNextSwipeLoading] = useState<number>(0);
-  console.log(book, swipeSuggestions, currentIndex);
- /* const pan = useRef(new Animated.ValueXY()).current;
+  // useEffect(() => {
+  console.log(`-------------------\n`);
+  console.log(`swipeSuggestions: ${JSON.stringify(swipeSuggestions)}`);
+  console.log(`currentIndex: ${currentIndex}`);
+  console.log(`-------------------\n`);
+  /* }, [
+    bookData,
+  ]);*/
+  /*const pan = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -55,16 +66,30 @@ export default function SwipeScreen({
       },
     })
   ).current;*/
+  function swipeHandler(dir: string) {
+    if (dir === "left") {
+      loadNextBook("dislike");
+    } else if (dir === "right") {
+      loadNextBook("like");
+    }
+  }
   async function loadNextBook(feedback: string) {
     if (currentIndex === swipeSuggestions.length - 1) {
+      let localSwipeSuggestions = swipeSuggestions;
+      localSwipeSuggestions[currentIndex].title = book.title;
+      localSwipeSuggestions[currentIndex].feedback = feedback;
+      let swipes = swipeSuggestions;
+      for (let i = 0; i < swipes.length; i++) {
+        swipes[i] = JSON.stringify(swipes[i]);
+      }
       setNextSwipeLoading(1);
-      swipeSuggestions[currentIndex].title = book.title;
-      swipeSuggestions[currentIndex].feedback = feedback;
-      swipeSuggestions[currentIndex] = JSON.stringify(
-        swipeSuggestions[currentIndex]
-      );
+      /*swipeFeedback[currentIndex].title = book.title;
+      swipeFeedback[currentIndex].feedback = feedback;
+      swipeFeedback[currentIndex] = JSON.stringify(
+        swipeFeedback[currentIndex]
+      );*/
       let uuid = await SecretStore.get("uuid");
-      fetch(`${APIEndpoint}/api/saveSwipes`, {
+      fetch(`https://shelfie.pidgon.com/api/saveSwipes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,47 +109,54 @@ export default function SwipeScreen({
       console.log("loading next book");
       setNextSwipeLoading(1);
       console.log(
+        "current book giving feedback:",
+        JSON.stringify(swipeSuggestions[currentIndex])
+      );
+      console.log(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           swipeSuggestions[currentIndex + 1].title
         )}`
       );
+
+      let localSwipeSuggestions = swipeSuggestions;
+      localSwipeSuggestions[currentIndex].title = book.title;
+      localSwipeSuggestions[currentIndex].feedback = feedback;
       fetch(
         `https://openlibrary.org/search.json?title=${encodeURIComponent(
           swipeSuggestions[currentIndex + 1].title
-        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&language=eng`
+        )}&fields=title,first_sentence,cover_edition_key,author_name,subject&limit=2&lang=en`
       )
         .then((response) => response.json())
         .then((response) => {
-          let book = response.docs[0];
-          let category = Object.keys(book).includes("subject")
-            ? book.subject
+          setNextSwipeLoading(0);
+          let nextBook = response.docs[0];
+          let category = Object.keys(nextBook).includes("subject")
+            ? nextBook.subject
             : [];
           category = category.slice(0, 3);
+
           var bookInfo: Book = {
-            title: book.title,
-            authors: Object.keys(book).includes("author_name")
-              ? book.author_name[0]
+            title: nextBook.title,
+            authors: Object.keys(nextBook).includes("author_name")
+              ? nextBook.author_name[0]
               : "",
-            description: Object.keys(book).includes("first_sentence")
-              ? book.first_sentence[0]
+            description: Object.keys(nextBook).includes("first_sentence")
+              ? nextBook.first_sentence[0]
               : "No description available",
-            etag: Object.keys(book).includes("cover_edition_key")
-              ? book.cover_edition_key
+            etag: Object.keys(nextBook).includes("cover_edition_key")
+              ? nextBook.cover_edition_key
               : "",
             category: category.join(", "),
           };
-          swipeSuggestions[currentIndex].title = book.title;
-          swipeSuggestions[currentIndex].feedback = feedback;
-          //stringify current index
-          swipeSuggestions[currentIndex] = JSON.stringify(
-            swipeSuggestions[currentIndex]
-          );
-          setNextSwipeLoading(0);
-          navigation.navigate("SwipeScreen", {
+          setSwipeSuggestionsData(localSwipeSuggestions);
+          setBookData(bookInfo);
+          setCurrentIndexData(currentIndex + 1);
+
+          /*navigation.navigate("SwipeScreen", {
             book: bookInfo,
-            swipeSuggestions: swipeSuggestions,
-            currentIndex: currentIndex + 1,
-          });
+            swipeSuggestions: swipeSuggestionsData,
+            currentIndex: currentIndex+1,
+          });*/
         });
     }
   }
@@ -141,7 +173,6 @@ export default function SwipeScreen({
               fontSize: 32,
               color: "black",
               fontWeight: "bold",
-              marginBottom: 10,
             }}
           >
             swipe
@@ -193,18 +224,23 @@ export default function SwipeScreen({
             </View>
           ) : (
             <>
-             {/* <Animated.View*/}
-             <View
-                style={{
-                  height: "80%",
-                  width: "90%",
-                  margin: "auto",
-                  backgroundColor: "#f8f8f8",
-                  borderColor: "white",
-                  borderWidth: 2,
-                  borderRadius: 25,
-                  marginBottom: 10,
-                /*transform: [
+              <TinderCard
+                onSwipe={(dir) => swipeHandler(dir)}
+                preventSwipe={["up", "down"]}
+                swipeRequirementType="velocity"
+              >
+                <View
+                  style={{
+                    height: "90%",
+                    width: 350,
+                    margin: "auto",
+                    backgroundColor: "#f8f8f8",
+                    borderColor: "white",
+                    borderWidth: 2,
+                    borderRadius: 25,
+                    marginBottom: 10,
+                  }}
+                  /*transform: [
                     {
                       translateX: pan.x.interpolate({
                         inputRange: [-200, 0, 200],
@@ -234,44 +270,44 @@ export default function SwipeScreen({
                   }),
                 }}
                 {...panResponder.panHandlers}*/
-                }}
-              >
-                <ScrollView
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                  }}
                 >
-                  <Text style={styles.title}>{book.title}</Text>
-                  {book.etag !== "" ? (
-                    <Image
-                      source={{
-                        uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
-                      }}
-                      style={{
-                        width: "auto",
-                        height: 200,
-                        resizeMode: "contain",
-                        margin: 10,
-                        marginLeft: 0,
-                        marginRight: 0,
-                      }}
-                    />
-                  ) : null}
-                  <View
+                  <ScrollView
                     style={{
-                      margin: 20,
-                      marginTop: 0,
-                      flexDirection: "column",
-                      gap: 20,
+                      height: "100%",
+                      width: "100%",
                     }}
                   >
-                    <Text style={{ fontSize: 20 }}>{book.authors}</Text>
-                    <Text style={{ fontSize: 20 }}>{book.category}</Text>
-                    <Text style={{ fontSize: 20 }}>{book.description}</Text>
-                  </View>
-                </ScrollView>
-                </View> {/*</Animated.View>*/}
+                    <Text style={styles.title}>{book.title}</Text>
+                    {book.etag !== "" ? (
+                      <Image
+                        source={{
+                          uri: `https://covers.openlibrary.org/b/olid/${book.etag}-L.jpg`,
+                        }}
+                        style={{
+                          width: "auto",
+                          height: 200,
+                          resizeMode: "contain",
+                          margin: 10,
+                          marginLeft: 0,
+                          marginRight: 0,
+                        }}
+                      />
+                    ) : null}
+                    <View
+                      style={{
+                        margin: 20,
+                        marginTop: 0,
+                        flexDirection: "column",
+                        gap: 20,
+                      }}
+                    >
+                      <Text style={{ fontSize: 20 }}>{book.authors}</Text>
+                      <Text style={{ fontSize: 20 }}>{book.category}</Text>
+                      <Text style={{ fontSize: 20 }}>{book.description}</Text>
+                    </View>
+                  </ScrollView>
+                </View>
+              </TinderCard>
               <View
                 style={{
                   flexDirection: "row",

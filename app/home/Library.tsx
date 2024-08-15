@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   Keyboard,
   ImageBackground,
   Pressable,
+  RefreshControl,
 } from "react-native";
 let gradient = require("../../assets/images/homeScreen.png");
 
@@ -18,21 +19,33 @@ import LibraryItem from "@/components/LibraryItem";
 
 export default function Library() {
   let [searchResults, setSearchResults] = useState<string[]>([]);
-  useEffect(() => {
-    searchBooks();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    searchBooks(true);
   }, []);
-  async function searchBooks() {
+  useEffect(() => {
+    searchBooks(false);
+  }, []);
+  async function searchBooks(refresh = false) {
     setSearchResults([]);
     let bookList = await AsyncStorage.getItem(`@shelfie:booklist`);
     let parsedBookList = bookList ? bookList.split(",") : [];
     if (parsedBookList.length === 0) {
       setSearchResults(["404shelfieerror"]);
+      if (refresh) {
+        setRefreshing(false);
+      }
     } else {
       let mapSearchResults: string[] = [];
       parsedBookList.map((etag: string) => {
         mapSearchResults.push(etag);
       });
       setSearchResults(mapSearchResults);
+      if (refresh) {
+        setRefreshing(false);
+      }
     }
   }
 
@@ -42,7 +55,11 @@ export default function Library() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <SafeAreaView style={styles.container}>
           <TouchableWithoutFeedback
             onPress={Keyboard.dismiss}

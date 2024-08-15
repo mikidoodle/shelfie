@@ -25,7 +25,7 @@ export default function Start({
   async function startSwiping() {
     setNextSwipeLoading(true);
     let uuid = await SecretStore.get("uuid");
-    fetch(`${APIEndpoint}/api/getSwipes`, {
+    fetch(`http://localhost:3000/api/getSwipes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,10 +39,7 @@ export default function Start({
         let swipeSuggestionsUF = JSON.parse(response.message);
         let swipeSuggestions: any = [];
         for (let i = 0; i < swipeSuggestionsUF.length; i++) {
-          swipeSuggestions.push({
-            title: swipeSuggestionsUF[i],
-            feedback: "",
-          });
+          swipeSuggestions.push({title: swipeSuggestionsUF[i], feedback: ""});
         }
         console.log(
           `https://openlibrary.org/search.json?title=${encodeURIComponent(
@@ -77,9 +74,9 @@ export default function Start({
             };
 
             navigation.navigate("SwipeScreen", {
-              book: bookInfo,
-              swipeSuggestions: swipeSuggestions,
-              currentIndex: 0,
+              bookData: bookInfo,
+              swipeSuggestionsData: swipeSuggestions,
+              currentIndexData: 0,
             });
           });
       });
@@ -120,7 +117,7 @@ export default function Start({
                 }}
                 color={"red"}
               />
-              swipe right to like a book
+              to like a book
             </Text>
             <Text style={{ fontSize: 20 }}>
               <Icon
@@ -135,11 +132,11 @@ export default function Start({
                 }}
                 color={"black"}
               />
-              swipe left to dislike a book
+               to dislike a book
             </Text>
             <Text style={{ fontSize: 20 }}>
               <Icon
-                name="bookmark"
+                name="no-entry"
                 type="octicon"
                 size={20}
                 style={{
@@ -151,7 +148,7 @@ export default function Start({
                 }}
                 color={"black"}
               />
-              swipe up to save a book
+              to pass
             </Text>
             <Pressable onPress={startSwiping}>
               <View

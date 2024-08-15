@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -9,6 +9,7 @@ import {
   Keyboard,
   ImageBackground,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
@@ -25,24 +26,30 @@ export default function Bulletin() {
   let [myISBNs, setMyISBNs] = useState<string[]>([]);
   let [userUUID, setUserUUID] = useState<any>();
   let [searchResults, setSearchResults] = useState<Review[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    searchHandler(true);
+  }, []);
 
   useEffect(() => {
     searchBooks();
   }, []);
-  async function searchHandler() {
+  async function searchHandler(refresh = false) {
     if (searchMode === 0) {
-      searchUsers();
+      searchUsers(refresh);
     } else {
-      searchBooks();
+      searchBooks(refresh);
     }
   }
 
-  async function searchUsers() {
+  async function searchUsers(refresh = false) {
     if (searchQuery.trim() === "") {
       return;
     }
     setSearchResults([]);
-    fetch(`${APIEndpoint}/api/getUsers`, {
+    fetch(`https://shelfie.pidgon.com/api/getUsers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,6 +75,9 @@ export default function Bulletin() {
               liked: [],
             },
           ]);
+          if (refresh) {
+            setRefreshing(false);
+          }
           return;
         }
         let reviewResults: Review[] = [];
@@ -87,6 +97,9 @@ export default function Bulletin() {
           reviewResults.push(reviewData);
         });
         setSearchResults(reviewResults);
+        if (refresh) {
+          setRefreshing(false);
+        }
       })
       .catch((e) => {
         console.log(e);
@@ -104,13 +117,16 @@ export default function Bulletin() {
             liked: [],
           },
         ]);
+        if (refresh) {
+          setRefreshing(false);
+        }
       });
   }
-  async function searchBooks() {
+  async function searchBooks(refresh = false) {
     let uuid = await SecretStore.get("uuid");
     setUserUUID(uuid);
     setSearchResults([]);
-    fetch(`${APIEndpoint}/api/getReviews`, {
+    fetch(`https://shelfie.pidgon.com/api/getReviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -141,6 +157,9 @@ export default function Bulletin() {
               liked: [],
             },
           ]);
+          if (refresh) {
+            setRefreshing(false);
+          }
           return;
         }
         let reviewResults: Review[] = [];
@@ -160,6 +179,9 @@ export default function Bulletin() {
           reviewResults.push(reviewData);
         });
         setSearchResults(reviewResults.reverse());
+        if (refresh) {
+          setRefreshing(false);
+        }
       })
       .catch((e) => {
         console.log(e);
@@ -177,6 +199,9 @@ export default function Bulletin() {
             liked: [],
           },
         ]);
+        if (refresh) {
+          setRefreshing(false);
+        }
       });
   }
 
@@ -186,7 +211,11 @@ export default function Bulletin() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <SafeAreaView style={styles.container}>
             <View>
@@ -196,13 +225,19 @@ export default function Bulletin() {
                   justifyContent: "space-between",
                 }}
               >
-                <Pressable onPress={() => {
-                  setSearchQuery("");
-                  searchBooks();
-                }}>
-                <Text style={styles.title}>explore</Text>
+                <Pressable
+                  onPress={() => {
+                    setSearchQuery("");
+                    searchBooks();
+                  }}
+                >
+                  <Text style={styles.title}>explore</Text>
                 </Pressable>
-                <Pressable onPress={searchHandler}>
+                <Pressable
+                  onPress={() => {
+                    searchHandler(false);
+                  }}
+                >
                   <Icon
                     name="sync"
                     type="octicon"
@@ -409,6 +444,14 @@ export default function Bulletin() {
                                 margin: "auto",
                                 justifyContent: "center",
                               }}
+                              onPress={() => {
+                                router.push({
+                                  pathname: "/profile",
+                                  params: {
+                                    username: review.username,
+                                  },
+                                });
+                              }}
                             >
                               <Icon
                                 name="pencil"
@@ -430,6 +473,7 @@ export default function Bulletin() {
                           review={review}
                           key={index}
                           uuid={userUUID}
+                          showBorder={false}
                         />
                       )
                     ) : (

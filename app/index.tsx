@@ -1,8 +1,7 @@
-import { useCallback, useEffect } from "react";
-import { Text, View, SafeAreaView } from "react-native";
-import { router, SplashScreen } from "expo-router";
+import { useEffect } from "react";
+import { View } from "react-native";
+import { router } from "expo-router";
 import * as SecretStore from "@/components/SecretStore";
-import styles from "../assets/styles/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
@@ -23,6 +22,7 @@ export default function Index() {
         }
       }
     }
+
     prepare();
   }, []);
   return <View></View>;

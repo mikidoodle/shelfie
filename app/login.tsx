@@ -31,7 +31,7 @@ export default function Index() {
   }, []);
   function Login() {
     setDisabled(true);
-    fetch(`${APIEndpoint}/api/login`, {
+    fetch(`https://shelfie.pidgon.com/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export default function Index() {
         }
       })
       .catch((err) => {
-        Alert.alert("An error occurred. Please try again later.");
+        Alert.alert("An error occurred. Please try again later.", JSON.stringify(err));
         setDisabled(false);
         console.log(err);
       });
@@ -66,8 +66,8 @@ export default function Index() {
       style={styles.image}
       imageStyle={{ opacity: 0.6 }}
     >
-      <SafeAreaView style={styles.container}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <SafeAreaView style={styles.container}>
           <View>
             <View
               style={{
@@ -99,6 +99,7 @@ export default function Index() {
                 keyboardType="default"
                 autoCapitalize="none"
                 autoComplete="off"
+                spellCheck={false}
               />
               <TextInput
                 style={styles.input}
@@ -108,7 +109,11 @@ export default function Index() {
                 secureTextEntry={true}
                 autoCapitalize="none"
               />
-              <Pressable style={isDisabled ? styles.disabledButton : styles.button} onPress={Login} disabled={isDisabled}>
+              <Pressable
+                style={isDisabled ? styles.disabledButton : styles.button}
+                onPress={Login}
+                disabled={isDisabled}
+              >
                 <Text style={styles.buttonText}>log in!</Text>
               </Pressable>
               <Text style={{ textAlign: "center" }}>or</Text>
@@ -128,8 +133,8 @@ export default function Index() {
               </View>
             </View>
           </View>
-        </TouchableWithoutFeedback>
-      </SafeAreaView>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
