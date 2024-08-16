@@ -1,30 +1,49 @@
-import { View, Text, Pressable, Alert } from "react-native";
-import { useState } from "react";
-import { Icon } from "@rneui/themed";
+import { View, Text, Pressable, Alert, Share } from "react-native";
+import { SetStateAction, useEffect, useState } from "react";
+import Octicons from "@expo/vector-icons/Octicons";
 import * as SecureStore from "expo-secure-store";
 import ResponsiveImage from "./ResponsiveImage";
 import { APIEndpoint, Book, ReviewPropItem } from "./Types";
 import * as LibraryStore from "./LibraryStore";
-async function get(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  if (result) {
-    return result;
-  } else {
-    return null;
-  }
-}
+import { router } from "expo-router";
+//import * as Sharing from "expo-sharing";
 export default function ReviewItem(props: ReviewPropItem) {
-  let { review, uuid } = props;
+  let { review, uuid, showBorder } = props;
+  const dictionary: {
+    [key: string]: string;
+  } = {
+    "0": "How would you describe this book to a friend?",
+    "1": "What was your favourite part?",
+    "2": "What was the most memorable takeaway from the book?",
+    "3": "What did you appreciate most about the author's writing style?",
+  };
   let [hasLiked, setHasLiked] = useState(review.liked.includes(uuid));
+  let [disableLike, setDisableLike] = useState(false);
+  let [disableShare, setDisableShare] = useState(false);
   let [likeCount, setLikeCount] = useState(review.liked.length);
   let [bookmarked, setBookmarked] = useState(false);
+  let [contentArray, setContentArray] = useState<string[]>([
+    review.content["0"],
+    review.content["1"],
+    review.content["2"],
+    review.content["3"],
+  ]);
+  /*useEffect(() => {
+    console.log('review.content')
+  let localContentArray: string[] = [];
+  for(var key in review.content) {
+    console.log(key);
+    console.log(review.content[key as keyof typeof review.content]);
+    let localContentArray = contentArray;
+    localContentArray[parseInt(key)] = review.content[key as keyof typeof review.content];
+  }
+  setContentArray(localContentArray);
+  },[]);*/
   LibraryStore.getBook(review.meta.etag).then((data) => {
-    console.log(review.meta.title, data);
     setBookmarked(data !== null);
   });
   async function remotelyAddToLibrary() {
-    let uuid = await get("uuid");
-    setBookmarked(await LibraryStore.getBook(review.meta.etag) !== null);
+    setBookmarked((await LibraryStore.getBook(review.meta.etag)) !== null);
     await LibraryStore.storeBook(review.meta.etag, {
       title: review.meta.title,
     });
@@ -61,10 +80,11 @@ export default function ReviewItem(props: ReviewPropItem) {
   async function likeReview() {
     setHasLiked(!review.liked.includes(uuid));
     setLikeCount(!review.liked.includes(uuid) ? likeCount + 1 : likeCount - 1);
+    setDisableLike(true);
     review.liked.includes(uuid)
       ? review.liked.splice(review.liked.indexOf(uuid), 1)
       : review.liked.push(uuid);
-    fetch(`${APIEndpoint}/api/likeReview`, {
+    fetch(`https://shelfie.pidgon.com/api/likeReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,11 +97,14 @@ export default function ReviewItem(props: ReviewPropItem) {
       .then((res) => res.json())
       .then((data) => {
         if (data.error !== true) {
+          setDisableLike(false);
         } else {
+          setDisableLike(false);
           Alert.alert("Error", "Could not like review");
         }
       })
       .catch((err) => {
+        setDisableLike(false);
         console.log(err);
         Alert.alert("Error", "Could not like review");
       });
@@ -92,7 +115,9 @@ export default function ReviewItem(props: ReviewPropItem) {
         backgroundColor: "white",
         margin: 10,
         borderRadius: 9,
-        width: 325,
+        width: "95%",
+        alignSelf: "center",
+        borderWidth: showBorder ? 1 : 0,
       }}
     >
       <View
@@ -101,21 +126,32 @@ export default function ReviewItem(props: ReviewPropItem) {
           shadowColor: "#37B7C3",
         }}
       >
-        <Text>
-          <Text
-            style={{
-              fontSize: 17,
-              fontWeight: "bold",
-              color: "#37B7C3",
-            }}
-          >
-            {review.username}
-          </Text>{" "}
-          read:
-        </Text>
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: "/profile",
+              params: {
+                username: review.username,
+              },
+            });
+          }}
+        >
+          <Text>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#37B7C3",
+              }}
+            >
+              {review.username}
+            </Text>{" "}
+            read:
+          </Text>
+        </Pressable>
         <Text
           style={{
-            fontSize: 15,
+            fontSize: 18,
             fontWeight: "bold",
           }}
         >
@@ -130,6 +166,24 @@ export default function ReviewItem(props: ReviewPropItem) {
             {review.meta.authors}
           </Text>
         </Text>
+        <Text style={{ fontSize: 16 }}>
+          and felt{" "}
+          {review.emotions
+            .split(", ")
+            .filter((emotion) => emotion !== "")
+            .map((emotion, index) => {
+              return (
+                <Text style={{ color: "#37B7C3" }} key={index}>
+                  {emotion}
+                  {index == review.emotions.split(", ").length - 1
+                    ? ""
+                    : index === review.emotions.split(", ").length - 2
+                    ? " and "
+                    : ", "}
+                </Text>
+              );
+            })}
+        </Text>
 
         {review.meta.etag !== "" ? (
           <ResponsiveImage
@@ -143,15 +197,32 @@ export default function ReviewItem(props: ReviewPropItem) {
             }}
           />
         ) : null}
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-          }}
-        >
-          {review.title}
+        <Text>
+          <View
+            style={{
+              flexDirection: "column",
+              gap: 15,
+            }}
+          >
+            {contentArray.map((answer: string, index: number) => {
+              if (answer.trim() !== "") {
+                return (
+                  <View key={index}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {dictionary[index.toString()]}
+                    </Text>
+                    <Text>{answer}</Text>
+                  </View>
+                );
+              }
+            })}
+          </View>
         </Text>
-        <Text>{review.content}</Text>
         <View
           style={{
             flexDirection: "row",
@@ -166,6 +237,7 @@ export default function ReviewItem(props: ReviewPropItem) {
               flexDirection: "row",
               gap: 5,
             }}
+            disabled={disableLike}
           >
             <Text
               style={{
@@ -174,19 +246,10 @@ export default function ReviewItem(props: ReviewPropItem) {
             >
               {likeCount}
             </Text>
-            <Icon
+            <Octicons
               name={`heart${hasLiked ? "-fill" : ""}`}
-              type="octicon"
               size={26}
               color={hasLiked ? "red" : "black"}
-            />
-          </Pressable>
-          <Pressable onPress={remotelyAddToLibrary}>
-            <Icon
-              name={`bookmark${bookmarked ? "-slash" : ""}`}
-              type="octicon"
-              size={26}
-              color={bookmarked ? "grey" : "black"}
             />
           </Pressable>
         </View>

@@ -24,7 +24,7 @@ export default function Index() {
     (async () => {
       let uuid = await SecretStore.get("uuid");
       if (uuid) {
-        router.replace("home");
+        router.replace("/home");
         console.log(uuid);
       }
     })();
@@ -123,7 +123,7 @@ export default function Index() {
                 }}
               >
                 <Link
-                  href="signup"
+                  href="/signup"
                   style={{
                     fontSize: 18,
                   }}

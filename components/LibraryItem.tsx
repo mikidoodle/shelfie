@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import ResponsiveImage from "./ResponsiveImage";
 import { router } from "expo-router";
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 export default function LibraryItem(props: any) {
   let [title, setTitle] = useState<string>("");
   let [authors, setAuthors] = useState<string>("");
@@ -26,7 +26,7 @@ export default function LibraryItem(props: any) {
         backgroundColor: "white",
         margin: 10,
         borderRadius: 9,
-        width: 325,
+        width: "80%",
       }}
     >
       <ResponsiveImage
@@ -79,9 +79,8 @@ export default function LibraryItem(props: any) {
             })
           }
         >
-          <Icon
+          <Octicons
             name="pencil"
-            type="octicon"
             size={20}
             style={{
               verticalAlign: "middle",

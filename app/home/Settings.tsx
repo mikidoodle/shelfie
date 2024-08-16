@@ -14,7 +14,7 @@ import {
 import { router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
 import * as SecretStore from "@/components/SecretStore";
-import { Icon } from "@rneui/themed";
+import Octicons from "@expo/vector-icons/Octicons";
 import styles from "../../assets/styles/style";
 import * as LibraryStore from "../../components/LibraryStore";
 
@@ -35,7 +35,10 @@ export default function Settings() {
   function storeOpenAIKey() {
     SecretStore.set("openAIKey", openAIKey).then(() => {
       setHasOpenAIKey(true);
-      Alert.alert("OpenAI API key saved!", "You can't use your custom key for swipes yet in the beta, but you'll be notified when it's available!");
+      Alert.alert(
+        "OpenAI API key saved!",
+        "You can't use your custom key for swipes yet in the beta, but you'll be notified when it's available!"
+      );
     });
   }
   function deleteOpenAIKey() {
@@ -53,13 +56,16 @@ export default function Settings() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.container}>
-          <ScrollView>
+          <ScrollView style={{ width: "90%" }}>
             <Text style={styles.title}>settings</Text>
             <View
               style={{
                 flexDirection: "column",
                 gap: 10,
                 marginTop: 30,
+                width: "95%",
+                justifyContent: "center",
+                margin: "auto",
               }}
             >
               <Pressable
@@ -75,7 +81,7 @@ export default function Settings() {
                   Clear Library
                 </Text>
               </Pressable>
-              <View>
+              {/* <View>
                 <Text>Use your own OpenAI API key for swipes.</Text>
 
                 <Text
@@ -89,13 +95,13 @@ export default function Settings() {
               <View
                 style={{
                   flexDirection: "row",
-                  gap: 5,
+                  gap: 10,
+                  width: '90%'
                 }}
               >
                 <View
                   style={{
-                    width: 260,
-                    margin: "auto",
+                    width: "70%",
                     padding: 5,
                     borderRadius: 5,
                     backgroundColor: "white",
@@ -125,7 +131,8 @@ export default function Settings() {
                     backgroundColor: "black",
                     borderColor: "black",
                     borderWidth: 2,
-                    width: 60,
+                    paddingLeft: 10,
+                    paddingRight: 10,
                     alignItems: "center",
                   }}
                   onPress={() => {
@@ -156,7 +163,7 @@ export default function Settings() {
                 >
                   Reset OpenAI key
                 </Text>
-              </Pressable>
+              </Pressable>*/}
               <Pressable
                 onPress={() => {
                   SecretStore.deleteSecret("uuid");
@@ -164,21 +171,27 @@ export default function Settings() {
                 }}
                 style={styles.settingsItemTrailing}
               >
-                <Text
+                <View
                   style={{
-                    color: "black",
-                    fontSize: 20,
+                    flexDirection: "row",
+                    gap: 5,
                   }}
                 >
-                  <Icon
+                  <Octicons
                     name="sign-out"
-                    type="octicon"
                     size={20}
                     style={{ paddingRight: 5 }}
                     color={"black"}
                   />
-                  Log out <Text style={{color: "#37B7C3"}}>@{username}</Text>
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                    }}
+                  >
+                    Log out{" "}
+                    <Text style={{ color: "#37B7C3" }}>@{username}</Text>
+                  </Text>
+                </View>
               </Pressable>
             </View>
           </ScrollView>

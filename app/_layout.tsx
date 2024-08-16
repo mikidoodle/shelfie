@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
+import { Alert } from 'react-native';
 export default function RootLayout() {
-
   return (
     <Stack
       screenOptions={{
@@ -8,7 +8,6 @@ export default function RootLayout() {
         contentStyle: {
           backgroundColor: "#fff",
         },
-        animation: "fade",
       }}
     >
       <Stack.Screen
@@ -33,7 +32,9 @@ export default function RootLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="login" />
       <Stack.Screen name="signup" />
-      <Stack.Screen name="home/index" />
+      <Stack.Screen name="home/index" options={{
+        animation: "fade"
+      }}/>
     </Stack>
   );
 }

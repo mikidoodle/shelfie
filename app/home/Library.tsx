@@ -11,11 +11,10 @@ import {
   RefreshControl,
 } from "react-native";
 let gradient = require("../../assets/images/homeScreen.png");
-
-import { Icon } from "@rneui/themed";
 import styles from "../../assets/styles/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LibraryItem from "@/components/LibraryItem";
+import Octicons from "@expo/vector-icons/Octicons";
 
 export default function Library() {
   let [searchResults, setSearchResults] = useState<string[]>([]);
@@ -66,28 +65,7 @@ export default function Library() {
             accessible={false}
           >
             <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
                 <Text style={styles.title}>shelf</Text>
-                <Pressable
-                  onPress={() => {
-                    setSearchResults([]);
-                    searchBooks();
-                  }}
-                >
-                  <Icon
-                    name="sync"
-                    type="octicon"
-                    size={26}
-                    style={styles.titleIcon}
-                    color={"black"}
-                  />
-                </Pressable>
-              </View>
               <View
                 style={{
                   alignItems: "center",

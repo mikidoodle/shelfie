@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "shelfie",
+    "name": "Shelfie",
     "slug": "shelfie",
-    "version": "1.0.0",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "shelfie",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -13,7 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.pidgon.shelfie",
       "config": {
         "usesNonExemptEncryption": false

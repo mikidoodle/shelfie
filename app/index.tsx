@@ -14,11 +14,11 @@ export default function Index() {
         let uuid = await SecretStore.get("uuid");
         if (uuid) {
           console.log("app ready");
-          router.replace("home");
+          router.replace("/home");
           console.log(uuid);
         } else {
           console.log("app ready");
-          router.replace("login");
+          router.replace("/login");
         }
       }
     }
