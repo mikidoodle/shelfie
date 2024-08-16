@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import styles from "@/assets/styles/style";
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 export default function FirstInstall() {

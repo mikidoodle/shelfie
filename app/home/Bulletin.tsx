@@ -14,7 +14,7 @@ import {
 import { Link, router } from "expo-router";
 let gradient = require("../../assets/images/homeScreen.png");
 import * as SecretStore from "@/components/SecretStore";
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 import { Review } from "@/components/Types";
 import styles from "../../assets/styles/style";
 import ReviewItem from "../../components/ReviewItem";
@@ -63,16 +63,16 @@ export default function Bulletin() {
         if (data.users.length === 0) {
           setSearchResults([
             {
-              title: "No users found :(",
               content: "",
               meta: {
-                title: "",
+                title: "No users found :(",
                 authors: "",
                 etag: "404shelfieerror",
               },
               username: "",
               uuid: "",
               liked: [],
+              emotions: ""
             },
           ]);
           if (refresh) {
@@ -83,16 +83,16 @@ export default function Bulletin() {
         let reviewResults: Review[] = [];
         data.users.map((review: any) => {
           var reviewData: Review = {
-            title: review.username,
             content: review.reviewCount,
             meta: {
-              title: "",
+              title: review.username,
               authors: "",
               etag: "shelfieuser",
             },
             username: review.username,
             uuid: review.uuid,
             liked: [],
+            emotions: ""
           };
           reviewResults.push(reviewData);
         });
@@ -105,16 +105,16 @@ export default function Bulletin() {
         console.log(e);
         setSearchResults([
           {
-            title: "You're offline!",
             content: "Connect to the internet to search for users.",
             meta: {
-              title: "",
+              title: "You're offline",
               authors: "",
               etag: "404shelfieerror",
             },
             username: "",
             uuid: "",
             liked: [],
+            emotions: ""
           },
         ]);
         if (refresh) {
@@ -141,20 +141,22 @@ export default function Bulletin() {
         if (data.reviews.length === 0) {
           setSearchResults([
             {
-              title:
-                searchQuery === "" ? "No reviews yet!" : "No reviews found :(",
               content:
                 searchQuery === ""
                   ? "Write one of your own from the search page!"
                   : "",
               meta: {
-                title: "",
+                title:
+                  searchQuery === ""
+                    ? "No reviews yet!"
+                    : "No reviews found :(",
                 authors: "",
                 etag: "404shelfieerror",
               },
               username: "",
               uuid: "",
               liked: [],
+              emotions: "",
             },
           ]);
           if (refresh) {
@@ -165,7 +167,6 @@ export default function Bulletin() {
         let reviewResults: Review[] = [];
         data.reviews.map((review: any) => {
           var reviewData: Review = {
-            title: review.title,
             content: review.content,
             meta: {
               title: review.meta.title,
@@ -175,6 +176,7 @@ export default function Bulletin() {
             username: review.username,
             uuid: review.uuid,
             liked: review.liked,
+            emotions: review.emotions
           };
           reviewResults.push(reviewData);
         });
@@ -187,16 +189,16 @@ export default function Bulletin() {
         console.log(e);
         setSearchResults([
           {
-            title: "You're offline!",
             content: "Connect to the internet to search for reviews.",
             meta: {
-              title: "",
+              title: "You're offline",
               authors: "",
               etag: "404shelfieerror",
             },
             username: "",
             uuid: "",
             liked: [],
+            emotions: ""
           },
         ]);
         if (refresh) {
@@ -219,12 +221,6 @@ export default function Bulletin() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <SafeAreaView style={styles.container}>
             <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
                 <Pressable
                   onPress={() => {
                     setSearchQuery("");
@@ -233,20 +229,6 @@ export default function Bulletin() {
                 >
                   <Text style={styles.title}>explore</Text>
                 </Pressable>
-                <Pressable
-                  onPress={() => {
-                    searchHandler(false);
-                  }}
-                >
-                  <Icon
-                    name="sync"
-                    type="octicon"
-                    size={26}
-                    style={styles.titleIcon}
-                    color={"black"}
-                  />
-                </Pressable>
-              </View>
               <View
                 style={{
                   flexDirection: "row",
@@ -280,9 +262,8 @@ export default function Bulletin() {
                   }}
                 >
                   {searchMode === 0 ? (
-                    <Icon
+                    <Octicons
                       name="mention"
-                      type="octicon"
                       size={24}
                       style={{
                         verticalAlign: "middle",
@@ -291,9 +272,8 @@ export default function Bulletin() {
                       color={"black"}
                     />
                   ) : (
-                    <Icon
+                    <Octicons
                       name="pencil"
-                      type="octicon"
                       size={24}
                       style={{
                         verticalAlign: "middle",
@@ -346,9 +326,8 @@ export default function Bulletin() {
                   }}
                 >
                   {cancelSearch ? (
-                    <Icon
+                    <Octicons
                       name="x"
-                      type="octicon"
                       size={24}
                       style={{
                         verticalAlign: "middle",
@@ -359,9 +338,8 @@ export default function Bulletin() {
                       color={"black"}
                     />
                   ) : (
-                    <Icon
+                    <Octicons
                       name="search"
-                      type="octicon"
                       size={24}
                       style={{
                         verticalAlign: "middle",
@@ -431,7 +409,7 @@ export default function Bulletin() {
                                 </Text>
                                 <Text>
                                   review
-                                  {parseInt(review.content) > 1 ? "s" : ""}
+                                  {parseInt(review.content) !== 1 ? "s" : ""}
                                 </Text>
                               </View>
                             </View>
@@ -453,9 +431,8 @@ export default function Bulletin() {
                                 });
                               }}
                             >
-                              <Icon
+                              <Octicons
                                 name="pencil"
-                                type="octicon"
                                 size={20}
                                 style={{
                                   verticalAlign: "middle",
@@ -493,7 +470,7 @@ export default function Bulletin() {
                             fontWeight: "bold",
                           }}
                         >
-                          {review.title}
+                          {review.meta.title}
                         </Text>
                         <Text> {review.content}</Text>
                       </View>

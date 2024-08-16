@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import * as SecretStore from "@/components/SecretStore";
 import { router, useLocalSearchParams } from "expo-router";
 import ReviewItem from "@/components/ReviewItem";
+import Octicons from "@expo/vector-icons/Octicons";
 export default function UserProfile() {
   const params = useLocalSearchParams();
   let { username } = params;
@@ -19,7 +20,6 @@ export default function UserProfile() {
   let [verified, setVerified] = useState<boolean>(false);
   let [reviews, setReviews] = useState<any[]>([]);
   async function loadData() {}
-
   useEffect(() => {
     SecretStore.get("uuid").then((uuid) => {
       if (uuid !== null) {
@@ -74,7 +74,9 @@ export default function UserProfile() {
               color: "#37B7C3",
             }}
           >
-            @{userMention}
+            @{userMention} {verified ? <Pressable onPress={()=>{
+              Alert.alert("Verified", "This user's account has been verified.")
+            }}><Octicons name="verified" size={22} color="#37B7C3" /></Pressable> : null}
           </Text>
         </View>
         <ScrollView

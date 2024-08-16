@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 let gradient = require("../../../assets/images/homeScreen.png");
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 import styles from "../../../assets/styles/style";
 import * as SecretStore from "@/components/SecretStore";
 import { APIEndpoint, Book } from "@/components/Types";
@@ -44,7 +44,7 @@ export default function SwipeScreen({
   console.log(`swipeSuggestions: ${JSON.stringify(swipeSuggestions)}`);
   console.log(`currentIndex: ${currentIndex}`);
   console.log(`-------------------\n`);
-  function swipeHandler(dir: string) {
+  /*function swipeHandler(dir: string) {
     if (dir === "left") {
       loadNextBook("dislike");
     } else if (dir === "right") {
@@ -52,7 +52,7 @@ export default function SwipeScreen({
     } else if (dir === "up") {
       loadNextBook("neutral");
     }
-  }
+  }*/
 
   async function loadNextBook(feedback: string) {
     if (currentIndex === swipeSuggestions.length - 1) {
@@ -84,7 +84,7 @@ export default function SwipeScreen({
         .catch((error) => {
           console.error("Error:", error);
           setNextSwipeLoading(0);
-          Alert.alert("Error", "Could not save swipes");
+          Alert.alert("Error", "Could not save scouts.");
         });
     } else {
       console.log("loading next book");
@@ -162,12 +162,12 @@ export default function SwipeScreen({
               fontWeight: "bold",
             }}
           >
-            swipe
+            scout
           </Text>
           {nextSwipeLoading === 1 ? (
             <View
               style={{
-                height: "75%",
+                height: "80%",
                 width: "90%",
                 margin: "auto",
                 backgroundColor: "#f8f8f8",
@@ -185,7 +185,7 @@ export default function SwipeScreen({
           ) : nextSwipeLoading === 2 ? (
             <View
               style={{
-                height: "75%",
+                height: "80%",
                 width: "90%",
                 margin: "auto",
                 backgroundColor: "#f8f8f8",
@@ -205,20 +205,20 @@ export default function SwipeScreen({
                   textAlign: "center",
                 }}
               >
-                Today's swipes are done!
+                Today's scouts are done!
               </Text>
               <Text>Check back tomorrow for more.</Text>
             </View>
           ) : (
             <>
-              <TinderCard
+              {/*<TinderCard
                 onSwipe={(dir) => swipeHandler(dir)}
                 preventSwipe={["down"]}
                 swipeRequirementType="velocity"
-              >
+              >*/}
                 <View
                   style={{
-                    height: "90%",
+                    height: "80%",
                     width: 350,
                     margin: "auto",
                     backgroundColor: "#f8f8f8",
@@ -264,7 +264,7 @@ export default function SwipeScreen({
                     </View>
                   </ScrollView>
                 </View>
-              </TinderCard>
+              {/*</TinderCard>*/}
               <View
                 style={{
                   flexDirection: "row",
@@ -284,9 +284,8 @@ export default function SwipeScreen({
                     loadNextBook("dislike");
                   }}
                 >
-                  <Icon
+                  <Octicons
                     name="x-circle-fill"
-                    type="octicon"
                     size={34}
                     style={{
                       verticalAlign: "middle",
@@ -308,9 +307,8 @@ export default function SwipeScreen({
                     loadNextBook("neutral");
                   }}
                 >
-                  <Icon
+                  <Octicons
                     name="no-entry"
-                    type="octicon"
                     size={34}
                     style={{
                       verticalAlign: "middle",
@@ -331,9 +329,8 @@ export default function SwipeScreen({
                     loadNextBook("like");
                   }}
                 >
-                  <Icon
+                  <Octicons
                     name="feed-heart"
-                    type="octicon"
                     size={34}
                     style={{
                       verticalAlign: "middle",

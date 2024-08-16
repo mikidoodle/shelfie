@@ -2,7 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import ResponsiveImage from "./ResponsiveImage";
 import AddToShelf from "./AddToShelf";
 import { router } from "expo-router";
-import { Icon } from "@rneui/themed";
+import Octicons from "@expo/vector-icons/Octicons";
 export default function SearchItem(props: any) {
   let { book } = props;
   return (
@@ -11,7 +11,8 @@ export default function SearchItem(props: any) {
         backgroundColor: "white",
         margin: 10,
         borderRadius: 9,
-        width: "90%",
+        width: "80%",
+        alignSelf: "center",
       }}
     >
       {book.etag !== "" ? (
@@ -55,8 +56,9 @@ export default function SearchItem(props: any) {
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-evenly",
+          justifyContent: "space-between",
           gap: 5,
+          width: "100%",
           borderBottomLeftRadius: 9,
           borderBottomRightRadius: 9,
           borderWidth: 2,
@@ -69,6 +71,7 @@ export default function SearchItem(props: any) {
             justifyContent: "center",
             gap: 5,
             margin: 10,
+            width: "30%"
           }}
           onPress={() =>
             router.push({
@@ -79,9 +82,8 @@ export default function SearchItem(props: any) {
             })
           }
         >
-          <Icon
+          <Octicons
             name="pencil"
-            type="octicon"
             size={20}
             style={{
               verticalAlign: "middle",
@@ -100,12 +102,12 @@ export default function SearchItem(props: any) {
         </Pressable>
         <View
           style={{
-            height: "100%",
-            width: 2,
-            backgroundColor: "#37B7C3",
+            justifyContent: "center",
+            width: "70%"
           }}
-        />
-        <AddToShelf book={book} />
+        >
+          <AddToShelf book={book} />
+        </View>
       </View>
     </View>
   );

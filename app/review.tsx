@@ -7,58 +7,54 @@ import {
   Text,
   Alert,
   Keyboard,
-  
 } from "react-native";
 import styles from "@/assets/styles/style";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useEffect, useState } from "react";
 import * as SecretStore from "@/components/SecretStore";
 import { APIEndpoint, Book } from "@/components/Types";
 import { Link, router, useLocalSearchParams } from "expo-router";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { Picker } from "@react-native-picker/picker";
+import RNPickerSelect from "react-native-picker-select";
+import Octicons from '@expo/vector-icons/Octicons';
 export default function ReviewModal() {
   const params = useLocalSearchParams();
   let { bookObject } = params;
   let book: Book =
     bookObject !== undefined ? JSON.parse(bookObject as string) : "{}";
-  let [reviewTitle, setReviewTitle] = useState<string>("");
   let [emotions, setEmotions] = useState<any>([]);
-  const emotionSelect = [
-    { id: 0, name: "Happy" },
-    { id: 1, name: "Sad" },
-    { id: 2, name: "Excited" },
-    { id: 3, name: "Angry" },
-    { id: 4, name: "Confused" },
-    { id: 5, name: "Inspired" },
-    { id: 6, name: "Nostalgic" },
-    { id: 7, name: "Hopeful" },
-    { id: 8, name: "Anxious" },
-    { id: 9, name: "Frustrated" },
-    { id: 10, name: "Content" },
-    { id: 11, name: "Surprised" },
-    { id: 12, name: "Relieved" },
-    { id: 13, name: "Disappointed" },
-    { id: 14, name: "Curious" },
-    { id: 15, name: "Empathetic" },
-    { id: 16, name: "Peaceful" },
-    { id: 17, name: "Motivated" },
-    { id: 18, name: "Amused" },
-    { id: 19, name: "Reflective" },
-  ];
   let [disableSubmit, setDisableSubmit] = useState<boolean>(false);
-  let [reviewContent, setReviewContent] = useState<string>("");
+  let [reviewContent, setReviewContent] = useState<string[]>(["", "", "", ""]);
   let [username, setUsername] = useState<string>("");
   let [uuid, setUUID] = useState<string>("");
   async function submitReview() {
     setDisableSubmit(true);
+    let reviewContentBody: { [key: number]: string } = {
+      0: "",
+      1: "",
+      2: "",
+      3: "",
+    };
+    let allEmpty = true;
+    for (let i = 0; i < reviewContent.length; i++) {
+      reviewContentBody[i] =
+        reviewContent[i] === undefined ? "" : reviewContent[i].trim();
+      if (reviewContent[i] !== "") {
+        allEmpty = false;
+      }
+    }
+    if (allEmpty) {
+      setDisableSubmit(false);
+      Alert.alert("Please answer at least one question.");
+      return;
+    }
     fetch(`https://shelfie.pidgon.com/api/addReview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: reviewTitle,
-        content: reviewContent,
+        content: reviewContentBody,
+        emotions: emotions.join(", "),
         book: book,
         uuid: uuid,
         username: username,
@@ -69,21 +65,16 @@ export default function ReviewModal() {
       })
       .then((data) => {
         if (data.error) {
-          Alert.alert(data.message);
-          if (router.canGoBack()) {
-            router.dismiss();
-          } else {
-            router.push("home");
-          }
-        } else {
           setDisableSubmit(false);
           Alert.alert(data.message);
+        } else {
+          Alert.alert(data.message);
+          router.dismiss();
         }
       })
       .catch((err) => {
         setDisableSubmit(false);
         Alert.alert("An error occurred. Please try again later.");
-        router.dismiss();
         console.log(err);
       });
   }
@@ -102,159 +93,341 @@ export default function ReviewModal() {
   const isPresented = router.canGoBack();
   return (
     <View>
-      <View>
+      <KeyboardAwareScrollView>
         <View>
           <View>
-            {(book as Book).etag !== "" ? (
-              <Image
-                source={{
-                  uri: `https://covers.openlibrary.org/b/olid/${
-                    (book as Book).etag
-                  }-M.jpg`,
-                }}
-                style={{
-                  width: "100%",
-                  height: 175,
-                  borderTopLeftRadius: 9,
-                  borderTopRightRadius: 9,
-                  resizeMode: "cover",
-                }}
-              />
-            ) : null}
-            <View
-              style={{
-                padding: 10,
-              }}
-            >
+            <View>
+              {(book as Book).etag !== "" ? (
+                <Image
+                  source={{
+                    uri: `https://covers.openlibrary.org/b/olid/${
+                      (book as Book).etag
+                    }-M.jpg`,
+                  }}
+                  style={{
+                    width: "100%",
+                    height: 175,
+                    borderTopLeftRadius: 9,
+                    borderTopRightRadius: 9,
+                    resizeMode: "cover",
+                  }}
+                />
+              ) : null}
               <View
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  gap: 5,
-                  width: "80%",
+                  padding: 10,
                 }}
               >
-                <Text
+                <View
                   style={{
-                    fontSize: 24,
-                    fontWeight: "bold",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    gap: 5,
+                    width: "100%",
+                    margin: "auto",
                   }}
                 >
-                  {(book as Book).title}
-                </Text>
-                <Pressable
-                  style={{
-                    backgroundColor: "black",
-                    padding: 10,
-                    borderRadius: 9,
-                  }}
-                  onPress={submitReview}
-                  disabled={disableSubmit}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontSize: 20,
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    {disableSubmit ? "Submitting..." : "Submit"}
-                  </Text>
-                </Pressable>
-              </View>
-              <Text
-                style={{
-                  paddingBottom: 5,
-                  paddingTop: 5,
-                  color: "grey",
-                }}
-              >
-                {username}'s review
-              </Text>
-            </View>
-          </View>
-          <ScrollView style={{ height: "100%" }}>
-            <TextInput
-              style={styles.reviewTitleInput}
-              placeholder="Title"
-              onChangeText={(text) => {
-                setReviewTitle(text);
-              }}
-              defaultValue={reviewTitle}
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            {/*<MultiSelect
-              hideTags
-              items={emotionSelect}
-              uniqueKey="id"
-              onSelectedItemsChange={setEmotions}
-              selectedItems={emotions}
-              selectText="Pick Items"
-              searchInputPlaceholderText="Search Items..."
-              onChangeInput={(text) => console.log(text)}
-              tagRemoveIconColor="#CCC"
-              tagBorderColor="#CCC"
-              tagTextColor="#CCC"
-              selectedItemTextColor="#CCC"
-              selectedItemIconColor="#CCC"
-              itemTextColor="#000"
-              displayKey="name"
-              searchInputStyle={{ color: "#000" }}
-              submitButtonColor="#CCC"
-              submitButtonText="Submit"
-            />
-            <View style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              padding: 5,
-            }}>
-              {emotions.map((emotion) => {
-                return (
-                  <View
-                    style={{
-                      backgroundColor: "black",
-                      borderRadius: 9,
-                      padding: 10,
-                      margin: 5,
-                    }}
-                    key={emotion}
-                  >
+                  <View>
                     <Text
                       style={{
-                        color: "white",
+                        fontSize: 24,
+                        fontWeight: "bold",
                       }}
                     >
-                      {emotionSelect[parseInt(emotion)].name}
+                      {(book as Book).title}
+                    </Text>
+                    <Text
+                      style={{
+                        paddingBottom: 5,
+                        paddingTop: 5,
+                        color: "grey",
+                      }}
+                    >
+                      {username}'s review
                     </Text>
                   </View>
-                );
-              })}
-            </View>*/}
-            <Picker
-              selectedValue={emotions[0]}
-              onValueChange={(itemValue) =>
-                setEmotions([itemValue, emotions[1], emotions[2]])
-              }
-            >
-              <Picker.Item label="Java" value="java" />
-              <Picker.Item label="JavaScript" value="js" />
-            </Picker>
-            <TextInput
-              style={styles.reviewContentInput}
-              placeholder="Write your review here!"
-              onChangeText={(text) => {
-                setReviewContent(text);
+                  <View style={{
+                    flexDirection: "row",
+                    gap: 10
+                  }}>
+                    <Pressable
+                      style={{
+                        backgroundColor: disableSubmit ? "grey" : "black",
+                        padding: 10,
+                        borderRadius: 9,
+                        height: 50,
+                        justifyContent: "center",
+                      }}
+                      onPress={submitReview}
+                      disabled={disableSubmit}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 20,
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        {disableSubmit ? "Posting..." : "Post!"}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      style={{
+                        backgroundColor: disableSubmit ? "grey" : "black",
+                        padding: 10,
+                        borderRadius: 9,
+                        height: 50,
+                        justifyContent: "center",
+                      }}
+                      onPress={()=>{
+                        router.dismiss();
+                      }}
+                      disabled={disableSubmit}
+                    >
+                      <Text
+                        style={{
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Octicons
+                          name="x"
+                          color={"white"}
+                          size={34}
+                        />
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View
+              style={{
+                justifyContent: "center",
+                padding: 10,
+                gap: 10,
               }}
-              defaultValue={reviewContent}
-              keyboardType="default"
-              autoCapitalize="none"
-              multiline={true}
-              numberOfLines={4}
-            />
-          </ScrollView>
+            >
+              <Text style={{ paddingLeft: 10, paddingRight: 10, fontSize: 18 }}>
+                After reading this book, I felt{" "}
+              </Text>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  padding: 10,
+                  marginBottom: 20,
+                }}
+              >
+                <Text style={{ fontSize: 18 }}>
+                  <RNPickerSelect
+                    onValueChange={(value) => {
+                      setEmotions([value, emotions[1], emotions[2]]);
+                    }}
+                    items={[
+                      { label: "happy", value: "happy" },
+                      { label: "sad", value: "sad" },
+                      { label: "excited", value: "excited" },
+                      { label: "angry", value: "angry" },
+                      { label: "confused", value: "confused" },
+                      { label: "inspired", value: "inspired" },
+                      { label: "curious", value: "curious" },
+                      { label: "nostalgic", value: "nostalgic" },
+                      { label: "hopeful", value: "hopeful" },
+                      { label: "anxious", value: "anxious" },
+                      { label: "frustrated", value: "frustrated" },
+                      { label: "content", value: "content" },
+                      { label: "surprised", value: "surprised" },
+                      { label: "relieved", value: "relieved" },
+                      { label: "disappointed", value: "disappointed" },
+                      { label: "empathetic", value: "empathetic" },
+                      { label: "peaceful", value: "peaceful" },
+                      { label: "motivated", value: "motivated" },
+                      { label: "amused", value: "amused" },
+                      { label: "reflective", value: "reflective" },
+                    ]}
+                    value={emotions[0]}
+                    placeholder={{ label: "emotion", value: "" }}
+                    style={{
+                      inputIOS: {
+                        fontSize: 16,
+                        borderRadius: 9,
+                        backgroundColor: "white",
+                        borderWidth: 2,
+                        padding: 5,
+                      },
+                    }}
+                  />
+                  <Text>, </Text>
+                  <RNPickerSelect
+                    onValueChange={(value) => {
+                      setEmotions([emotions[0], value, emotions[2]]);
+                    }}
+                    items={[
+                      { label: "happy", value: "happy" },
+                      { label: "sad", value: "sad" },
+                      { label: "excited", value: "excited" },
+                      { label: "angry", value: "angry" },
+                      { label: "confused", value: "confused" },
+                      { label: "inspired", value: "inspired" },
+                      { label: "curious", value: "curious" },
+                      { label: "nostalgic", value: "nostalgic" },
+                      { label: "hopeful", value: "hopeful" },
+                      { label: "anxious", value: "anxious" },
+                      { label: "frustrated", value: "frustrated" },
+                      { label: "content", value: "content" },
+                      { label: "surprised", value: "surprised" },
+                      { label: "relieved", value: "relieved" },
+                      { label: "disappointed", value: "disappointed" },
+                      { label: "empathetic", value: "empathetic" },
+                      { label: "peaceful", value: "peaceful" },
+                      { label: "motivated", value: "motivated" },
+                      { label: "amused", value: "amused" },
+                      { label: "reflective", value: "reflective" },
+                    ]}
+                    value={emotions[1]}
+                    placeholder={{ label: "emotion", value: "" }}
+                    style={{
+                      inputIOS: {
+                        fontSize: 16,
+                        borderRadius: 9,
+                        backgroundColor: "white",
+                        borderWidth: 2,
+                        padding: 5,
+                      },
+                    }}
+                  />
+                  <Text>, and </Text>
+                  <RNPickerSelect
+                    onValueChange={(value) => {
+                      setEmotions([emotions[0], emotions[1], value]);
+                    }}
+                    items={[
+                      { label: "happy", value: "happy" },
+                      { label: "sad", value: "sad" },
+                      { label: "excited", value: "excited" },
+                      { label: "angry", value: "angry" },
+                      { label: "confused", value: "confused" },
+                      { label: "inspired", value: "inspired" },
+                      { label: "curious", value: "curious" },
+                      { label: "nostalgic", value: "nostalgic" },
+                      { label: "hopeful", value: "hopeful" },
+                      { label: "anxious", value: "anxious" },
+                      { label: "frustrated", value: "frustrated" },
+                      { label: "content", value: "content" },
+                      { label: "surprised", value: "surprised" },
+                      { label: "relieved", value: "relieved" },
+                      { label: "disappointed", value: "disappointed" },
+                      { label: "empathetic", value: "empathetic" },
+                      { label: "peaceful", value: "peaceful" },
+                      { label: "motivated", value: "motivated" },
+                      { label: "amused", value: "amused" },
+                      { label: "reflective", value: "reflective" },
+                    ]}
+                    value={emotions[2]}
+                    placeholder={{ label: "emotion", value: "" }}
+                    style={{
+                      inputIOS: {
+                        fontSize: 16,
+                        borderRadius: 9,
+                        backgroundColor: "white",
+                        borderWidth: 2,
+                        padding: 5,
+                      },
+                    }}
+                  />
+                </Text>
+                 
+              </View>
+              <View style={{ margin: 10, justifyContent: "center", gap: 10 }}>
+                <View>
+                  <Text>The following are four questions about the book.</Text>
+                  <Text> You can answer any of them.</Text>
+                </View>
+                <Text style={{ fontSize: 18 }}>
+                  How would you describe this book to a friend?
+                </Text>
+                <TextInput
+                  style={styles.reviewContentInput}
+                  placeholder="I would describe this book as..."
+                  onChangeText={(text) => {
+                    setReviewContent([
+                      text,
+                      reviewContent[1],
+                      reviewContent[2],
+                      reviewContent[3],
+                    ]);
+                  }}
+                  defaultValue={reviewContent[0]}
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  multiline={true}
+                  numberOfLines={2}
+                />
+                <Text style={{ fontSize: 18 }}>
+                  What was your favourite part?
+                </Text>
+                <TextInput
+                  style={styles.reviewContentInput}
+                  placeholder="My favourite part was..."
+                  onChangeText={(text) => {
+                    setReviewContent([
+                      reviewContent[0],
+                      text,
+                      reviewContent[2],
+                      reviewContent[3],
+                    ]);
+                  }}
+                  defaultValue={reviewContent[1]}
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  multiline={true}
+                  numberOfLines={2}
+                />
+                <Text style={{ fontSize: 18 }}>
+                  What was the most memorable takeaway from the book?
+                </Text>
+                <TextInput
+                  style={styles.reviewContentInput}
+                  placeholder="The most memorable takeaway was..."
+                  onChangeText={(text) => {
+                    setReviewContent([
+                      reviewContent[0],
+                      reviewContent[1],
+                      text,
+                      reviewContent[3],
+                    ]);
+                  }}
+                  defaultValue={reviewContent[2]}
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  multiline={true}
+                  numberOfLines={2}
+                />
+                <Text style={{ fontSize: 18 }}>
+                  What did you appreciate most about the author's writing style?
+                </Text>
+                <TextInput
+                  style={styles.reviewContentInput}
+                  placeholder="Something I appreciated about the author's writing style was..."
+                  onChangeText={(text) => {
+                    setReviewContent([
+                      reviewContent[0],
+                      reviewContent[1],
+                      reviewContent[2],
+                      text,
+                    ]);
+                  }}
+                  defaultValue={reviewContent[3]}
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  multiline={true}
+                  numberOfLines={2}
+                />
+              </View>
+            </View>
+          </View>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { Icon } from "@rneui/themed";
+import Octicons from "@expo/vector-icons/Octicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
@@ -8,11 +8,10 @@ import Settings from "./Settings";
 import styles from "../../assets/styles/style";
 import Bulletin from "./Bulletin";
 import Swipes from "./Swipes";
-import UserProfile from "../profile";
-
 const Tab = createBottomTabNavigator();
 const ModalStack = createStackNavigator();
 export default function Home() {
+  
   function ModalScreen() {
     return (
       <View
@@ -40,16 +39,21 @@ export default function Home() {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
-            position: "absolute",
+            /*position: "absolute",
             bottom: 25,
             left: 33.5,
-            width: 325,
+            width: 325,*/
+            position: 'absolute',
+            bottom: "3%",
+            left: "7.5%",
+            width: '85%',
+            alignSelf: "center",
             height: 60,
             shadowColor: "#37B7C3",
             shadowOpacity: 0.5,
             shadowRadius: 48,
             borderRadius: 64,
-            elevation: 5,
+            elevation: 10,
             backgroundColor: "#F8F8F8",
             backfaceVisibility: "hidden",
           },
@@ -62,7 +66,7 @@ export default function Home() {
           component={Bulletin}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="home" type="octicon" color={color} />
+              <Octicons name="home" color={color} size={size} />
             ),
           }}
         />
@@ -71,7 +75,7 @@ export default function Home() {
           component={HomeScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="telescope" type="octicon" color={color} />
+              <Octicons name="telescope" color={color} size={size} />
             ),
           }}
         />
@@ -81,7 +85,7 @@ export default function Home() {
           component={Swipes}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="heart" type="octicon" color={color} />
+              <Octicons name="heart" color={color} size={size} />
             ),
           }}
         />
@@ -90,7 +94,7 @@ export default function Home() {
           component={Library}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="repo" type="octicon" color={color} />
+              <Octicons name="repo" color={color} size={size} />
             ),
           }}
         />
@@ -100,7 +104,7 @@ export default function Home() {
           component={Settings}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="gear" type="octicon" color={color} />
+              <Octicons name="gear" color={color} size={size} />
             ),
           }}
         />

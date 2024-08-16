@@ -1,5 +1,5 @@
 import { Pressable, Text } from "react-native";
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 import { useState } from "react";
 import * as LibraryStore from "@/components/LibraryStore";
 export default function AddToShelf(props: any) {
@@ -28,9 +28,8 @@ export default function AddToShelf(props: any) {
       }}
       onPress={toggleShelf}
     >
-      <Icon
+      <Octicons
         name={addToShelf ? "star-fill" : "star"}
-        type="octicon"
         size={20}
         style={{
           verticalAlign: "middle",

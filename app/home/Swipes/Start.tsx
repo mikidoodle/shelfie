@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 let gradient = require("../../../assets/images/homeScreen.png");
-import { Icon } from "@rneui/themed";
+import Octicons from "@expo/vector-icons/Octicons";
 import * as SecretStore from "@/components/SecretStore";
 import styles from "../../../assets/styles/style";
 import { APIEndpoint, Book } from "@/components/Types";
@@ -37,11 +37,11 @@ export default function Start({
     })
       .then((response) => response.json())
       .then((response) => {
-        if(response.error) {
+        if (response.error) {
           navigation.navigate("SwipeScreen", {
             bookData: {},
             swipeSuggestionsData: {},
-            currentIndexData: 1000
+            currentIndexData: 1000,
           });
           return;
         }
@@ -85,7 +85,7 @@ export default function Start({
             navigation.navigate("SwipeScreen", {
               bookData: bookInfo,
               swipeSuggestionsData: swipeSuggestions,
-              currentIndexData: 0
+              currentIndexData: 0,
             });
           });
       })
@@ -110,7 +110,7 @@ export default function Start({
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 20 }}>welcome to swipes!</Text>
+          <Text style={{ fontSize: 20 }}>welcome to scout!</Text>
           <View
             style={{
               flexDirection: "column",
@@ -118,52 +118,18 @@ export default function Start({
               marginTop: 10,
             }}
           >
-            <Text style={{ fontSize: 20 }}>
-              <Icon
-                name="heart-fill"
-                type="octicon"
-                size={20}
-                style={{
-                  verticalAlign: "middle",
-                  margin: 5,
-                  position: "relative",
-                  top: 5,
-                }}
-                color={"red"}
-              />
-              to like a book
-            </Text>
-            <Text style={{ fontSize: 20 }}>
-              <Icon
-                name="x-circle-fill"
-                type="octicon"
-                size={20}
-                style={{
-                  verticalAlign: "middle",
-                  margin: 5,
-                  position: "relative",
-                  top: 5,
-                }}
-                color={"black"}
-              />
-              to dislike a book
-            </Text>
-            <Text style={{ fontSize: 20 }}>
-              <Icon
-                name="no-entry"
-                type="octicon"
-                size={20}
-                style={{
-                  verticalAlign: "middle",
-                  margin: 5,
-                  marginRight: 7,
-                  position: "relative",
-                  top: 5,
-                }}
-                color={"black"}
-              />
-              to pass
-            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Octicons name="heart-fill" size={24} color={"red"} />
+              <Text style={{ fontSize: 20 }}>to like a book</Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Octicons name="x-circle-fill" size={24} color={"black"} />
+              <Text style={{ fontSize: 20 }}>to dislike a book</Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Octicons name="no-entry" size={24} color={"grey"} />
+              <Text style={{ fontSize: 20 }}>to pass</Text>
+            </View>
             <Pressable onPress={startSwiping} disabled={nextSwipeLoading}>
               <View
                 style={{
@@ -181,9 +147,7 @@ export default function Start({
                     margin: "auto",
                   }}
                 >
-                  {nextSwipeLoading
-                    ? "loading today's swipes..."
-                    : "start swiping!"}
+                  {nextSwipeLoading ? "loading..." : "start scouting!"}
                 </Text>
               </View>
             </Pressable>

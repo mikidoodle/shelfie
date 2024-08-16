@@ -12,7 +12,7 @@ import {
   Pressable,
 } from "react-native";
 let gradient = require("../../assets/images/homeScreen.png");
-import { Icon } from "@rneui/themed";
+import Octicons from '@expo/vector-icons/Octicons';
 import { Book } from "@/components/Types";
 import styles from "../../assets/styles/style";
 import SearchItem from "@/components/SearchItem";
@@ -103,7 +103,7 @@ export default function HomeScreen() {
                 flexDirection: "row",
                 marginTop: 10,
                 margin: "auto",
-                width: 350,
+                width: "85%",
                 backgroundColor: "white",
                 borderRadius: 9,
                 shadowColor: "#37B7C3",
@@ -148,9 +148,8 @@ export default function HomeScreen() {
                   searchBooks(searchQuery);
                 }}
               >
-                <Icon
+                <Octicons
                   name="search"
-                  type="octicon"
                   size={24}
                   style={{ verticalAlign: "middle", marginTop: 2 }}
                   color={isSearching ? "lightgrey" : "black"}
@@ -161,6 +160,7 @@ export default function HomeScreen() {
               style={{
                 alignItems: "center",
                 justifyContent: "center",
+                margin:'auto',
                 width: "100%",
               }}
             >

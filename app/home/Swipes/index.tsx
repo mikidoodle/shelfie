@@ -23,10 +23,10 @@ export default function Swipes() {
             contentStyle: {
               backgroundColor: "#fff",
             },
-            animation: "fade",
+            animation: "fade"
           }}
         >
-          <Stack.Screen name="Start Page" component={Start} />
+          <Stack.Screen name="Start Page" component={Start}/>
           <Stack.Screen name="SwipeScreen" component={SwipeScreen} />
         </Stack.Navigator>
       </NavigationContainer>
