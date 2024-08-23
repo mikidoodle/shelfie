@@ -20,16 +20,16 @@ npm i
 npm install -g eas-cli
 ```
 Since this app uses Expo, you'll need to log in with your account by running the below command. If you don't have one, you'll be prompted to sign up.
-```
+```bash
 eas login
 ```
 Once that's done, you'll need to configure your build. You can adjust as needed, hopefully nothing should break. 
-```
+```bash
 eas build:configure # follow instructions and adjust as needed
 ```
 Finally, build the app. This should take 10-15 minutes, but there may be a queue.
 
-```
+```bash
 eas build --platform ios --profile development
 ```
 
@@ -39,11 +39,11 @@ eas build --platform ios --profile development
 Follow the same instructions for installing it on the Simulator, but leave out the last step.
 
 Run this command to create an ad hoc provisioning profile for your device
-```
+```bash
 eas device:create
 ```
 Finally, run
-```
+```bash
 eas build --platform ios --profile development
 ```
 to build the app. This should take 10-15 minutes and there may be a queue.
