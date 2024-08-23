@@ -25,7 +25,7 @@ eas login
 ```
 Once that's done, you'll need to configure your build. You can adjust as needed, hopefully nothing should break. 
 ```bash
-eas build:configure # follow instructions and adjust as needed
+eas build:configure
 ```
 Finally, build the app. This should take 10-15 minutes, but there may be a queue.
 
