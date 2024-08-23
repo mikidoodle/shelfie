@@ -12,7 +12,7 @@ Here are a few of it's features:
 - 🔮 Scout, a page that uses GPT-3.5 to learn from reviews that you've liked and your searches to recommend books to you, in a Tinder-like swipe page.
 
 # Running it locally
-The following are steps to install the app. If you run into any problems, message me on the Slack @mihi, or email me at mihir@pidgon.com!
+The following are steps to install the app. If you run into any problems, message me on the Slack ([@mihi](https://hackclub.slack.com/team/U05PRRU5GSJ)), or email me at mihir@pidgon.com!
 
 If you do not have Apple Developer Program membership, follow the steps to install it on Simulator
 ## On the Simulator
@@ -39,7 +39,21 @@ eas build --platform ios --profile development
 
 ## On your iOS Device
 > :warning: **You need an active subscription to the Apple Developer Program to install it on your device.**
-Follow the same instructions for installing it on the Simulator, but leave out the last one.
-Run this command to add your device to the list
-```eas device:create```
 
+Follow the same instructions for installing it on the Simulator, but leave out the last step.
+
+Run this command to create an ad hoc provisioning profile for your device
+```
+eas device:create
+```
+Finally, run
+```
+eas build --platform ios --profile development
+```
+to build the app. This should take 10-15 minutes and there may be a queue.
+
+To install it on your device, first enable [Developer mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) and scan the QR code that appeared on your terminal after the app finished building.
+
+## TestFlight
+
+If you have an iOS device and don't want to build it locally, DM me on the slack ([@mihi](https://hackclub.slack.com/team/U05PRRU5GSJ)) for a TestFlight link! I don't have an Android build yet, but let me know if you're able to do it!
