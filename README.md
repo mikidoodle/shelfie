@@ -1,6 +1,6 @@
 Shelfie is a book management app that helps you keep track of what you’ve read and what you want to read. You can log books into your personal library, receive book recommendations, and share your reviews on the explore page for everyone to see.
 
-Here are a few of it's features:
+# Features
 - 🔎 A search page, for users to browse through books fetched from the OpenLibrary API, and then add books to their shelf or write a review on them.
 - 🔭 An explore page for users to read reviews posted by others and search for reviews and users.
 - 📚 Shelf, a locally stored library of books that users want to read/are reading.
