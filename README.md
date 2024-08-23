@@ -1,7 +1,3 @@
-
-![shelfie banner](https://github.com/user-attachments/assets/ec9ac4ad-76cf-48cf-b5c9-edbab80e992a)
-
-
 Shelfie is a book management app that helps you keep track of what you’ve read and what you want to read. You can log books into your personal library, receive book recommendations, and share your reviews on the explore page for everyone to see.
 
 Here are a few of it's features:
@@ -38,7 +34,7 @@ eas build --platform ios --profile development
 ```
 
 ## On your iOS Device
-> :warning: **You need an active subscription to the Apple Developer Program to install it on your device.**
+>  ⚠️ **You need an active subscription to the Apple Developer Program to install it on your device.**
 
 Follow the same instructions for installing it on the Simulator, but leave out the last step.
 
